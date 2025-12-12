@@ -1,0 +1,42 @@
+Create a single-file HTML web application using Three.js and MediaPipe Hands that creates a "Realistic Golden Universe" controller.
+
+--- TECHNOLOGIES ---
+1. Three.js (via CDN) for 3D rendering.
+2. MediaPipe Hands & Camera Utils (via CDN) for hand tracking.
+3. Tailwind CSS (via CDN) for UI.
+
+--- VISUAL REQUIREMENTS ---
+1. **The Planet:** It must be formed by ~8000 particles (not a solid mesh) in a sphere shape. Colors: Gold to Dark Orange gradient.
+2. **The Core:** A pulsing Blue/Cyan sprite in the center of the planet (simulating a heartbeat).
+3. **The Rings:** 3 distinct particle rings rotating at different speeds.
+   - Ring 1: Main golden ring (dense).
+   - Ring 2 & 3: Thinner outer rings with random vibrant colors.
+4. **The Texture:** Generate a "sharp" particle texture using HTML Canvas (radial gradient with a hard center) to make particles look like shiny dust/diamonds, not blurry blobs.
+5. **Background:** Realistic stars with varying sizes and colors (white, slight blue, slight red) generated using Gaussian distribution. Add a subtle nebula effect.
+
+--- CONTROL LOGIC (CRUCIAL) ---
+Use MediaPipe to detect one hand. Map gestures to camera/scene transformations:
+
+1. **Fist Gesture (Rotate XY):**
+   - Detect if all fingers are folded.
+   - Action: Rotate the entire universe group on the X and Y axes based on hand movement.
+   - **IMPORTANT:** Use **Quaternions** and accumulate rotations in **World Space** (premultiply), NOT local space. This ensures the rotation always follows the user's screen perspective, regardless of the object's current orientation.
+
+2. **Two Fingers / "Gun" Gesture (Zoom):**
+   - Detect if Thumb and Index are extended, but Middle, Ring, and Pinky are folded.
+   - Action: Measure distance between Thumb and Index tip. Pinch to Zoom Out, Spread to Zoom In (Smooth camera Z movement).
+
+3. **Open Hand / "Twist" Gesture (Roll Z):**
+   - Detect if hand is open (not fist, not 2-fingers).
+   - Action: Calculate the angle of the hand (using Wrist and Middle Finger MCP).
+   - Rotate the universe on the **Z-axis (Roll)** relative to the screen center. Ensure the direction matches the hand's twist direction naturally.
+
+--- UI REQUIREMENTS ---
+- A simple, semi-transparent instruction card in the top-left corner explaining the gestures.
+- A "Toggle Info" button to hide/show the instructions.
+- A small, mirrored webcam feed in the bottom corner with a border indicating tracking status (Orange = Loading, Cyan = Active).
+
+--- CONSTRAINTS ---
+- Code must be in a single HTML file.
+- Handle "Quaternions slerp" for smooth rotation physics.
+- Do not use external images (generate textures via Canvas).
