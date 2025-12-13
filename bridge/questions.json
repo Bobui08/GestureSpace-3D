@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "question": "Gia đình được định nghĩa là cộng đồng người đặc biệt dựa trên những mối quan hệ cơ bản nào?",
+        "options": [
+            "Quan hệ kinh tế và quan hệ xã hội",
+            "Quan hệ hôn nhân và quan hệ huyết thống",
+            "Quan hệ pháp lý và quan hệ tình cảm",
+            "Quan hệ bạn bè và quan hệ đồng nghiệp"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Gia đình dựa trên quan hệ hôn nhân (cơ sở pháp lý) và quan hệ huyết thống (mối quan hệ tự nhiên)."
+    },
+    {
+        "id": 2,
+        "question": "Chức năng nào được coi là chức năng đặc thù của gia đình mà không cộng đồng nào thay thế được?",
+        "options": [
+            "Chức năng kinh tế",
+            "Chức năng giáo dục",
+            "Chức năng tái sản xuất ra con người",
+            "Chức năng thỏa mãn nhu cầu tâm sinh lý"
+        ],
+        "correctAnswer": 2,
+        "explanation": "Tái sản xuất ra con người là chức năng đặc thù đáp ứng nhu cầu duy trì nòi giống và nguồn lao động."
+    },
+    {
+        "id": 3,
+        "question": "Cơ sở chính trị - xã hội để xây dựng gia đình trong thời kỳ quá độ là gì?",
+        "options": [
+            "Thiết lập chế độ công hữu về tư liệu sản xuất",
+            "Thiết lập chính quyền nhà nước của giai cấp công nhân và nhân dân lao động",
+            "Phát triển nền kinh tế thị trường",
+            "Giữ gìn bản sắc văn hóa dân tộc"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Nhà nước XHCN là công cụ xóa bỏ luật lệ cũ, giải phóng phụ nữ và bảo vệ hạnh phúc gia đình."
+    },
+    {
+        "id": 4,
+        "question": "Chế độ hôn nhân tiến bộ bao gồm những đặc điểm nào?",
+        "options": [
+            "Hôn nhân sắp đặt, đa thê",
+            "Hôn nhân tự nguyện, một vợ một chồng, bình đẳng và được đảm bảo về pháp lý",
+            "Hôn nhân dựa trên lợi ích kinh tế",
+            "Hôn nhân không cần thủ tục pháp lý"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Hôn nhân tiến bộ dựa trên tình yêu, tự nguyện, bình đẳng và có sự thừa nhận của pháp luật."
+    },
+    {
+        "id": 5,
+        "question": "Xu hướng biến đổi về quy mô của gia đình Việt Nam hiện nay là gì?",
+        "options": [
+            "Gia đình tứ đại đồng đường ngày càng phổ biến",
+            "Gia đình mở rộng, nhiều thế hệ",
+            "Gia đình hạt nhân, quy mô nhỏ (chỉ hai thế hệ)",
+            "Gia đình không có con cái"
+        ],
+        "correctAnswer": 2,
+        "explanation": "Gia đình Việt Nam đang chuyển dần sang quy mô nhỏ, gia đình đơn (hạt nhân) để phù hợp với xã hội công nghiệp."
+    }
+]
