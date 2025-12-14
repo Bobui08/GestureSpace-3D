@@ -61,7 +61,7 @@ const Game = () => {
             <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
                 <Suspense fallback={null}>
                     {gameState === 'PRE_INTRO' ? (
-                        <PreIntroEffect 
+                        <PreIntroEffect
                             leftHand={leftHand}
                             rightHand={rightHand}
                             gestureLeft={gestureLeft}

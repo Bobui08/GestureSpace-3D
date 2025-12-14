@@ -1,7 +1,9 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Text, Float, Html } from '@react-three/drei';
+import { Text, Float, Html, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import SocialEnvironment from './SocialEnvironment';
+import { useGameStore } from '../../store/gameStore';
 
 const Fireworks = ({ count = 5 }) => {
     const particles = useMemo(() => {
@@ -82,6 +84,17 @@ const Firework = ({ position, color }) => {
 const CelebrationEffect = () => {
     const groupRef = useRef();
 
+    const { score, gameStartTime } = useGameStore();
+    const totalTime = gameStartTime ? Date.now() - gameStartTime : 0;
+
+    // Format duration
+    const formatDuration = (ms) => {
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${minutes}p ${s}s`;
+    };
+
     useFrame((state) => {
         const t = state.clock.getElapsedTime();
         if (groupRef.current) {
@@ -94,12 +107,14 @@ const CelebrationEffect = () => {
     return (
         <group ref={groupRef}>
             {/* Warp Speed Stars */}
+            {/* Warp Speed Stars */}
             {/* Removed Stars for Residential Context */}
+            <SocialEnvironment />
 
             {/* Floating 3D Text */}
             <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
                 <Text
-                    position={[0, 2, -5]}
+                    position={[0, 4.5, -5]}
                     fontSize={1.5}
                     color="#00f3ff"
                     anchorX="center"
@@ -110,7 +125,7 @@ const CelebrationEffect = () => {
                     CHÚC MỪNG!
                 </Text>
                 <Text
-                    position={[0, 0.5, -5]}
+                    position={[0, 3.2, -5]}
                     fontSize={0.6}
                     color="#ffffff"
                     anchorX="center"
@@ -118,13 +133,26 @@ const CelebrationEffect = () => {
                 >
                     NGÔI NHÀ HẠNH PHÚC ĐÃ HOÀN THÀNH
                 </Text>
+
+                <Text
+                    position={[0, 2.2, -5]}
+                    fontSize={0.4}
+                    color="#FFD700"
+                    anchorX="center"
+                    anchorY="middle"
+                >
+                    ĐIỂM SỐ: {score} | THỜI GIAN: {formatDuration(totalTime)}
+                </Text>
             </Float>
+
+            {/* Camera Controls */}
+            <OrbitControls makeDefault autoRotate autoRotateSpeed={0.5} />
 
             {/* Particle Fireworks */}
             <Fireworks count={20} />
 
             {/* Replay Button */}
-            <Html position={[0, -1.5, -5]} transform center>
+            <Html position={[0, -0.2, -5]} transform center>
                 <button
                     onClick={() => window.location.reload()}
                     style={{

@@ -8,12 +8,15 @@ import { BLOCKS, STAGES, SLOTS } from '../../data/gameData';
 import HandModel from './HandModel';
 
 const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
-    const groupRef = useRef();
+    const groupRef = useRef<THREE.Group>(null);
     const { camera } = useThree();
     const [rotation, setRotation] = useState([0, 0, 0]);
     const { currentStage, placedBlocks, placeBlock } = useGameStore();
 
     const [availableBlocks, setAvailableBlocks] = useState([]);
+    const [grabbedBlockId, setGrabbedBlockId] = useState<string | null>(null);
+    // Single Block Grab Restriction
+
 
     useEffect(() => {
         const placedIds = placedBlocks[currentStage].map(b => b.id);
@@ -57,13 +60,25 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
         }
     });
 
-    const [handPos, setHandPos] = useState(new Vector3(0, 0, 0));
+
+
+    // --- Hand Position Logic ---
+    const [handPos, setHandPos] = useState(new Vector3(0, 0, 0)); // Right Hand
+    const [leftHandPos, setLeftHandPos] = useState(new Vector3(0, 0, 0)); // Left Hand
 
     useFrame(({ camera, viewport }) => {
-        if (rightHand) {
+        // Right Hand Processing
+        if (rightHand && rightHand[8]) {
             const x = (1 - rightHand[8].x) * viewport.width - viewport.width / 2;
             const y = (1 - rightHand[8].y) * viewport.height - viewport.height / 2;
             setHandPos(new Vector3(x, y, 0));
+        }
+
+        // Left Hand Processing
+        if (leftHand && leftHand[8]) {
+            const x = (1 - leftHand[8].x) * viewport.width - viewport.width / 2;
+            const y = (1 - leftHand[8].y) * viewport.height - viewport.height / 2;
+            setLeftHandPos(new Vector3(x, y, 0));
         }
     });
 
@@ -96,6 +111,10 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
             return { success: false, reason: 'NO_NEARBY_SLOT' };
         }
 
+        if (placementResult && placementResult.success) {
+            setGrabbedBlockId(null); // Unlock when successfully placed
+        }
+
         return placementResult || { success: false };
     };
 
@@ -114,7 +133,11 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
                     key={block.id}
                     data={block}
                     handPos={handPos}
+                    leftHandPos={leftHandPos}
                     gestureRight={gestureRight}
+                    gestureLeft={gestureLeft}
+                    grabbedBlockId={grabbedBlockId}
+                    setGrabbedBlockId={setGrabbedBlockId}
                     onDrop={(id, pos) => handleDrop(id, pos, block)}
                 />
             ))}

@@ -216,7 +216,7 @@ const IntroEffect = () => {
                         outlineWidth={0.04}
                         outlineColor="#ff00ff"
                     >
-                        FAMILY BUILDER 3D
+                        HÀNH TRÌNH XÂY TỔ ẤM
                     </Text>
                     <Text
                         position={[0, 4.2, 0]} // Raised relative to title

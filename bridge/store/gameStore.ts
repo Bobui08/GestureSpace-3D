@@ -41,8 +41,12 @@ interface GameStore {
     checkStageCompletion: () => void;
     transitionToQuiz: () => void;
     advanceStage: () => void;
+
     placeBlock: (blockType: string, blockData: Block) => { success: boolean; reason?: string; points?: number; multiplier?: number };
     answerQuiz: (answerIndex: number) => { correct: boolean; hint?: string };
+
+    // Total Time Tracking
+    gameStartTime: number | null;
 
 
     // Defense Phase
@@ -58,6 +62,7 @@ interface GameStore {
 
 export const useGameStore = create<GameStore>((set, get) => ({
     gameState: 'PRE_INTRO',
+    gameStartTime: null,
     score: 0,
     currentStage: STAGES.FOUNDATION,
     placedBlocks: {
@@ -114,6 +119,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             streakCount: 0,
             multiplier: 1,
             stageStartTime: Date.now(),
+            gameStartTime: Date.now(),
             stageElapsedTime: 0,
             usedQuestionIds: [],
             currentQuestion: null,

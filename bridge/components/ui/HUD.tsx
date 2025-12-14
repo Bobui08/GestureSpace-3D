@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 
 const HUD = ({ gestureLeft, gestureRight }) => {
     const {
         score, currentStage, gameState, startGame,
-        stageElapsedTime, streakCount, multiplier,
-        gamePhase, houseHealth, defenseTimeLeft
+        stageElapsedTime, streakCount, multiplier, // Keep stageElapsedTime if needed for other logic, but we will use gameStartTime for display
+        gamePhase, houseHealth, defenseTimeLeft,
+        gameStartTime
     } = useGameStore();
 
     const getStageName = (s) => {
@@ -18,12 +19,40 @@ const HUD = ({ gestureLeft, gestureRight }) => {
         }
     };
 
+    // Local timer state for smooth updates
+    const [currentTime, setCurrentTime] = useState(0);
+
+    // Update timer locally every second to ensure it ticks
+    useEffect(() => {
+        if (!gameStartTime) return;
+
+        const updateTimer = () => {
+            setCurrentTime(Date.now() - gameStartTime);
+        };
+
+        // Initial update
+        updateTimer();
+
+        const interval = setInterval(updateTimer, 1000);
+        return () => clearInterval(interval);
+    }, [gameStartTime]);
+
     const formatTime = (ms) => {
         const seconds = Math.floor(ms / 1000);
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
     };
+
+    const [showRoofAlert, setShowRoofAlert] = useState(false);
+
+    useEffect(() => {
+        if (currentStage === 'ROOF') {
+            setShowRoofAlert(true);
+            const timer = setTimeout(() => setShowRoofAlert(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [currentStage]);
 
     // PRE_INTRO, INTRO, WON states are handled entirely within 3D scenes
     if (gameState === 'PRE_INTRO' || gameState === 'INTRO' || gameState === 'WON') return null;
@@ -89,6 +118,22 @@ const HUD = ({ gestureLeft, gestureRight }) => {
         );
     }
 
+
+
+    // Roof Instruction Alert
+    if (showRoofAlert && gamePhase !== 'DEFEND') {
+        return (
+            <div style={{ ...styles.fullscreenOverlay, background: 'rgba(0,0,0,0.8)' }}>
+                <h1 style={{ ...styles.title, fontSize: '3rem', color: '#DAA520' }}>⚠️ GIAI ĐOẠN LỢP MÁI ⚠️</h1>
+                <h2 style={{ color: 'white', marginBottom: '20px' }}>YÊU CẦU SỨC MẠNH ĐỒNG TÂM</h2>
+                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '15px' }}>
+                    <p style={{ fontSize: '1.5rem', margin: '10px 0' }}>👐 <strong>DÙNG HAI TAY</strong> để nâng mái nhà</p>
+                    <p style={{ fontSize: '1.2rem', color: '#aaa' }}>Giữ thăng bằng và phối hợp nhịp nhàng!</p>
+                </div>
+            </div>
+        );
+    }
+
     // Default HUD
     return (
         <div style={styles.hudContainer}>
@@ -102,7 +147,7 @@ const HUD = ({ gestureLeft, gestureRight }) => {
                 {/* Timer */}
                 <div style={styles.timerBox}>
                     <span style={styles.label}>⏱️ THỜI GIAN</span>
-                    <span style={styles.value}>{formatTime(stageElapsedTime)}</span>
+                    <span style={styles.value}>{formatTime(currentTime)}</span>
                 </div>
 
                 <div style={styles.stageBox}>
