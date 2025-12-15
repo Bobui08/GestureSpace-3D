@@ -1,7 +1,15 @@
 {
-  "buildCommand": "cd bridge && npm run build",
-  "outputDirectory": "bridge/.next",
-  "installCommand": "cd bridge && npm install",
-  "framework": "nextjs",
-  "regions": ["iad1"]
+  "version": 2,
+  "builds": [
+    {
+      "src": "bridge/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/bridge/$1"
+    }
+  ]
 }
