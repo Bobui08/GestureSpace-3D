@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd bridge && npm run build",
+  "outputDirectory": "bridge/.next",
+  "installCommand": "cd bridge && npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"]
+}
