@@ -49,7 +49,7 @@ const MovingProjectile = ({ id, pos, type, onHitHouse, onHitHand, leftHandPos, r
             const zDiff = Math.abs(ref.current.position.z - handPos.z);
 
             // Radius 1.5 for XY, and generous Z range
-            return distXY < 1.0 && zDiff < 4.0;
+            return distXY < 0.7 && zDiff < 4.0;
         };
 
         if (checkHand(leftHandPos) || checkHand(rightHandPos)) {
@@ -194,13 +194,13 @@ const DefensePhase = ({ leftHand, rightHand }) => {
             {/* Hand Visualizers (Shields) */}
             {leftPos && (
                 <mesh position={leftPos}>
-                    <ringGeometry args={[0.5, 1.2, 32]} />
+                    <ringGeometry args={[0.2, 0.6, 32]} />
                     <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
                 </mesh>
             )}
             {rightPos && (
                 <mesh position={rightPos}>
-                    <ringGeometry args={[0.5, 1.2, 32]} />
+                    <ringGeometry args={[0.2, 0.6, 32]} />
                     <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
                 </mesh>
             )}
