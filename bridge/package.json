@@ -12,21 +12,14 @@
     "@mediapipe/hands": "^0.4.1675469240",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
-    "@react-three/postprocessing": "^2.16.4",
     "gsap": "^3.14.1",
     "leva": "^0.9.35",
     "next": "16.0.10",
-    "postprocessing": "^6.36.4",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "three": "^0.182.0",
     "uuid": "^13.0.0",
     "zustand": "^5.0.9"
-  },
-  "overrides": {
-    "@react-three/postprocessing": {
-      "@react-three/fiber": "$@react-three/fiber"
-    }
   },
   "devDependencies": {
     "@types/node": "^25.0.1",
