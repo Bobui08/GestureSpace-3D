@@ -80,8 +80,13 @@ const Game = () => {
                             {/* NEW ENVIRONMENT: Social Residential Area */}
                             <SocialEnvironment />
 
-                            {/* Camera Controls */}
-                            <OrbitControls makeDefault enableZoom={true} enablePan={true} enableRotate={true} />
+                            {/* Camera Controls - Mouse only, no hand control */}
+                            <OrbitControls 
+                                makeDefault 
+                                enableZoom={true} 
+                                enablePan={true} 
+                                enableRotate={true} 
+                            />
 
                             {/* Render Game Scene (Building) */}
                             {useGameStore.getState().gamePhase === 'BUILD' && (

@@ -38,27 +38,21 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
         })));
     }, [currentStage, placedBlocks]);
 
-    useFrame(() => {
-        // Only rotate if Left Hand is used and NO Mouse interaction is active (OrbitControls usually takes over)
-        // But user asked for "Hand rotates" AND "Mouse rotates". 
-        // OrbitControls handles mouse. Hand handles custom logic.
-        // To allow OrbitControls to work, we shouldn't force rotation unless hand gesture is detected.
-        if (leftHand && (gestureLeft === 'PINCH' || gestureLeft === 'OPEN')) {
-            const indexTip = leftHand[8];
-            const targetRotY = (indexTip.x - 0.5) * Math.PI * 2;
-            const targetRotX = (indexTip.y - 0.5) * Math.PI * 0.5;
-
-            // groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.1);
-            // groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, targetRotX, 0.1);
-
-            // Let's modify the Group rotation, not Camera. OrbitControls moves Camera.
-            // So they can coexist.
-            if (groupRef.current) {
-                groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.1);
-                groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, targetRotX, 0.1);
-            }
-        }
-    });
+    // Hand rotation disabled - only mouse (OrbitControls) can rotate
+    // useFrame(() => {
+    //     const isRoofStageWithTwoHands = currentStage === 'ROOF' && grabbedBlockId !== null;
+    //     
+    //     if (!isRoofStageWithTwoHands && leftHand && (gestureLeft === 'PINCH' || gestureLeft === 'OPEN')) {
+    //         const indexTip = leftHand[8];
+    //         const targetRotY = (indexTip.x - 0.5) * Math.PI * 2;
+    //         const targetRotX = (indexTip.y - 0.5) * Math.PI * 0.5;
+    //
+    //         if (groupRef.current) {
+    //             groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.1);
+    //             groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, targetRotX, 0.1);
+    //         }
+    //     }
+    // });
 
 
 
