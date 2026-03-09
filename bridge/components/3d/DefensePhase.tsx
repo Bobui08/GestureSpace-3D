@@ -9,8 +9,8 @@ import { HitEffect } from './ParticleSystem';
 // Projectile Type: 'BAD' (Vice) or 'GOOD' (Value)
 type ProjectileType = 'BAD' | 'GOOD';
 
-const BAD_LABELS = ['Ma túy', 'Cờ bạc', 'Mại dâm', 'Bạo lực', 'Rượu chè', 'Mê tín'];
-const GOOD_LABELS = ['Hạnh phúc', 'Yêu thương', 'Sẻ chia', 'Thủy chung', 'Hiếu thảo', 'Hòa thuận'];
+const BAD_LABELS = ['Can quet', 'Lo co so', 'Danh pha tiep te', 'Ap chien luoc', 'Do bo quan My', 'Nhiu thong tin'];
+const GOOD_LABELS = ['Chi vien', 'Bao mat', 'Doan ket', 'Bam dan', 'Dau tri', 'Phan tan luc luong'];
 
 const MovingProjectile = ({ id, pos, type, onHitHouse, onHitHand, leftHandPos, rightHandPos }) => {
     const ref = useRef<THREE.Group>(null);

@@ -1,0 +1,384 @@
+{
+  "gameId": "revolution-network-1954-1965",
+  "title": "Ngân hàng câu hỏi theo giai đoạn",
+  "stages": [
+    {
+      "stageId": "stage_1_1954_1960",
+      "stageTitle": "1954-1960: Giữ lực lượng, xây nền, mở thế",
+      "questions": [
+        {
+          "id": "S1Q1",
+          "question": "Hiệp định Geneva về Đông Dương được ký vào năm nào?",
+          "options": [
+            "1954",
+            "1956",
+            "1959",
+            "1960"
+          ],
+          "correctIndex": 0,
+          "explanation": "Hiệp định Geneva được ký tháng 7 năm 1954."
+        },
+        {
+          "id": "S1Q2",
+          "question": "Sau năm 1954, nhiệm vụ chiến lược của cách mạng Việt Nam được xác định như thế nào?",
+          "options": [
+            "Chỉ tập trung đấu tranh quân sự ở miền Nam",
+            "Miền Bắc xây dựng CNXH, miền Nam tiếp tục cách mạng dân tộc dân chủ",
+            "Tạm dừng đấu tranh ở cả hai miền",
+            "Chỉ ưu tiên ngoại giao quốc tế"
+          ],
+          "correctIndex": 1,
+          "explanation": "Đảng xác định hai nhiệm vụ chiến lược khác nhau nhưng thống nhất mục tiêu."
+        },
+        {
+          "id": "S1Q3",
+          "question": "Ranh giới quân sự tạm thời sau Geneva 1954 nằm ở khu vực nào?",
+          "options": [
+            "Vĩ tuyến 13",
+            "Vĩ tuyến 15",
+            "Vĩ tuyến 17",
+            "Vĩ tuyến 19"
+          ],
+          "correctIndex": 2,
+          "explanation": "Vĩ tuyến 17 là giới tuyến quân sự tạm thời."
+        },
+        {
+          "id": "S1Q4",
+          "question": "Một trọng tâm lãnh đạo của Đảng ở miền Bắc giai đoạn 1954-1960 là gì?",
+          "options": [
+            "Mở rộng căn cứ quân sự nước ngoài",
+            "Khôi phục kinh tế, cải tạo xã hội chủ nghĩa và củng cố hậu phương",
+            "Ngừng sản xuất để ưu tiên chiến tranh tổng lực",
+            "Tập trung phát triển du lịch"
+          ],
+          "correctIndex": 1,
+          "explanation": "Miền Bắc được xây dựng thành hậu phương lớn cho cả nước."
+        },
+        {
+          "id": "S1Q5",
+          "question": "Nghị quyết 15 của Trung ương Đảng (1959) có ý nghĩa nổi bật nào?",
+          "options": [
+            "Chủ trương không đấu tranh ở miền Nam",
+            "Xác định con đường cách mạng miền Nam kết hợp chính trị với lực lượng vũ trang",
+            "Chuyển toàn bộ lực lượng ra miền Bắc",
+            "Từ bỏ mục tiêu thống nhất đất nước"
+          ],
+          "correctIndex": 1,
+          "explanation": "Nghị quyết 15 mở đường cho bước phát triển mới của cách mạng miền Nam."
+        },
+        {
+          "id": "S1Q6",
+          "question": "Phong trào Đồng khởi bùng nổ mạnh mẽ đầu tiên ở đâu vào năm 1960?",
+          "options": [
+            "Bến Tre",
+            "Huế",
+            "Hà Nội",
+            "Hải Phòng"
+          ],
+          "correctIndex": 0,
+          "explanation": "Bến Tre là địa phương tiêu biểu mở đầu cao trào Đồng khởi."
+        },
+        {
+          "id": "S1Q7",
+          "question": "Sự ra đời của Mặt trận Dân tộc Giải phóng miền Nam Việt Nam diễn ra vào thời điểm nào?",
+          "options": [
+            "20/12/1960",
+            "02/09/1954",
+            "21/07/1954",
+            "01/01/1963"
+          ],
+          "correctIndex": 0,
+          "explanation": "Mặt trận Dân tộc Giải phóng miền Nam ra đời ngày 20/12/1960."
+        },
+        {
+          "id": "S1Q8",
+          "question": "Vai trò của miền Bắc đối với miền Nam trong giai đoạn này được nhấn mạnh là gì?",
+          "options": [
+            "Trung lập hoàn toàn",
+            "Hậu phương lớn chi viện cho tiền tuyến lớn miền Nam",
+            "Chỉ quan hệ văn hóa",
+            "Không có liên hệ chiến lược"
+          ],
+          "correctIndex": 1,
+          "explanation": "Miền Bắc vừa xây dựng vừa làm hậu phương chiến lược cho miền Nam."
+        },
+        {
+          "id": "S1Q9",
+          "question": "Tuyến vận tải chiến lược Bắc - Nam được tổ chức từ năm 1959 gắn với lực lượng nào?",
+          "options": [
+            "Đoàn 559",
+            "Đoàn 308",
+            "Đoàn 325",
+            "Đoàn 351"
+          ],
+          "correctIndex": 0,
+          "explanation": "Đoàn 559 được thành lập để mở tuyến vận tải chiến lược."
+        },
+        {
+          "id": "S1Q10",
+          "question": "Ý nghĩa của phong trào Đồng khởi đối với cách mạng miền Nam là gì?",
+          "options": [
+            "Làm suy giảm vai trò quần chúng",
+            "Đưa cách mạng từ thế giữ gìn lực lượng sang thế tiến công",
+            "Kết thúc ngay chiến tranh",
+            "Thay thế hoàn toàn đấu tranh chính trị"
+          ],
+          "correctIndex": 1,
+          "explanation": "Đồng khởi tạo bước ngoặt chiến lược quan trọng cho cách mạng miền Nam."
+        }
+      ]
+    },
+    {
+      "stageId": "stage_2_1961_1963",
+      "stageTitle": "1961-1963: Đánh bại từng bước Chiến tranh đặc biệt",
+      "questions": [
+        {
+          "id": "S2Q1",
+          "question": "Đặc trưng cơ bản của chiến lược 'Chiến tranh đặc biệt' của Mỹ ở miền Nam là gì?",
+          "options": [
+            "Dùng quân đội Mỹ trực tiếp làm lực lượng chủ yếu ngay từ đầu",
+            "Dùng quân đội Sài Gòn làm chủ yếu, có cố vấn và phương tiện Mỹ hỗ trợ",
+            "Không sử dụng vũ khí hiện đại",
+            "Chỉ tiến hành trên mặt trận ngoại giao"
+          ],
+          "correctIndex": 1,
+          "explanation": "Chiến tranh đặc biệt dựa chủ yếu vào quân đội Sài Gòn dưới sự chỉ huy của Mỹ."
+        },
+        {
+          "id": "S2Q2",
+          "question": "Biện pháp quan trọng của chiến lược Chiến tranh đặc biệt nhằm kiểm soát nông thôn là gì?",
+          "options": [
+            "Ấp chiến lược",
+            "Cải cách ruộng đất",
+            "Mở tổng tuyển cử",
+            "Liên minh công nông"
+          ],
+          "correctIndex": 0,
+          "explanation": "Ấp chiến lược là công cụ chính để dồn dân, tách cách mạng khỏi quần chúng."
+        },
+        {
+          "id": "S2Q3",
+          "question": "Một thắng lợi quân sự tiêu biểu đầu năm 1963 của quân dân miền Nam là trận nào?",
+          "options": [
+            "Điện Biên Phủ",
+            "Ấp Bắc",
+            "Vạn Tường",
+            "Đường 9 - Khe Sanh"
+          ],
+          "correctIndex": 1,
+          "explanation": "Chiến thắng Ấp Bắc (1963) có ý nghĩa cổ vũ lớn."
+        },
+        {
+          "id": "S2Q4",
+          "question": "Trong giai đoạn 1961-1963, phương châm đấu tranh ở miền Nam được vận dụng theo hướng nào?",
+          "options": [
+            "Chỉ đấu tranh chính trị",
+            "Kết hợp đấu tranh chính trị, quân sự và binh vận",
+            "Chỉ chờ viện trợ quốc tế",
+            "Từ bỏ lực lượng vũ trang"
+          ],
+          "correctIndex": 1,
+          "explanation": "Đảng lãnh đạo kết hợp nhiều hình thức đấu tranh đồng thời."
+        },
+        {
+          "id": "S2Q5",
+          "question": "Vai trò của miền Bắc trong giai đoạn này đối với cách mạng miền Nam là gì?",
+          "options": [
+            "Không tham gia chi viện",
+            "Tiếp tục làm hậu phương chiến lược, chi viện sức người sức của",
+            "Chỉ hỗ trợ tuyên truyền",
+            "Chỉ hỗ trợ ngoại giao"
+          ],
+          "correctIndex": 1,
+          "explanation": "Miền Bắc vẫn giữ vai trò hậu phương lớn trong suốt quá trình."
+        },
+        {
+          "id": "S2Q6",
+          "question": "Sự kiện chính trị nào năm 1963 cho thấy chính quyền Ngô Đình Diệm rơi vào khủng hoảng nghiêm trọng?",
+          "options": [
+            "Khởi nghĩa Yên Bái",
+            "Phong trào đấu tranh Phật giáo và đảo chính lật đổ Diệm",
+            "Thành lập ASEAN",
+            "Ký Hiệp định Paris"
+          ],
+          "correctIndex": 1,
+          "explanation": "Khủng hoảng 1963 làm chính quyền Sài Gòn bất ổn sâu sắc."
+        },
+        {
+          "id": "S2Q7",
+          "question": "Mục đích chính của việc phá ấp chiến lược là gì?",
+          "options": [
+            "Mở rộng đô thị hóa",
+            "Giành lại dân, giành lại thế làm chủ nông thôn",
+            "Chuyển dân ra miền Bắc",
+            "Hạn chế sản xuất nông nghiệp"
+          ],
+          "correctIndex": 1,
+          "explanation": "Phá ấp chiến lược là giành dân, giành đất, giành quyền làm chủ."
+        },
+        {
+          "id": "S2Q8",
+          "question": "Đánh giá đúng về kết quả chiến lược Chiến tranh đặc biệt đến cuối 1963 là gì?",
+          "options": [
+            "Thành công hoàn toàn",
+            "Lâm vào thế bị động và khủng hoảng",
+            "Đã kết thúc chiến tranh",
+            "Không có tác động"
+          ],
+          "correctIndex": 1,
+          "explanation": "Đến cuối 1963, chiến lược này gặp thất bại lớn, bị sa lầy."
+        },
+        {
+          "id": "S2Q9",
+          "question": "Trong game, cụm mạng 'tam giác bền vững' tượng trưng cho bài học lịch sử nào?",
+          "options": [
+            "Chỉ dựa vào một lực lượng đơn lẻ",
+            "Kết hợp lực lượng chính trị, vũ trang và hậu cần",
+            "Tách rời Bắc và Nam",
+            "Phụ thuộc hoàn toàn vào bên ngoài"
+          ],
+          "correctIndex": 1,
+          "explanation": "Bài học cốt lõi là phối hợp đồng bộ các mặt trận."
+        },
+        {
+          "id": "S2Q10",
+          "question": "Yếu tố then chốt giúp mạng lưới cách mạng tồn tại trong truy quét mạnh là gì?",
+          "options": [
+            "Tăng Exposure để mở rộng nhanh",
+            "Bám dân, phân tán hợp lý, giữ liên lạc chỉ huy",
+            "Đóng toàn bộ tuyến vận chuyển",
+            "Loại bỏ vùng an toàn"
+          ],
+          "correctIndex": 1,
+          "explanation": "Bám dân và giữ liên kết chỉ huy là điều kiện sống còn."
+        }
+      ]
+    },
+    {
+      "stageId": "stage_3_1964_1965",
+      "stageTitle": "1964-1965: Chống leo thang chiến tranh, giữ vững thế chủ động",
+      "questions": [
+        {
+          "id": "S3Q1",
+          "question": "Sự kiện Vịnh Bắc Bộ năm 1964 đã bị Mỹ sử dụng làm cớ để làm gì?",
+          "options": [
+            "Rút toàn bộ quân khỏi khu vực",
+            "Mở rộng chiến tranh và tăng cường đánh phá miền Bắc",
+            "Tổ chức tổng tuyển cử hai miền",
+            "Công nhận hòa bình lâu dài"
+          ],
+          "correctIndex": 1,
+          "explanation": "Mỹ dùng sự kiện này để leo thang chiến tranh."
+        },
+        {
+          "id": "S3Q2",
+          "question": "Từ năm 1965, Mỹ chuyển sang chiến lược nào ở miền Nam?",
+          "options": [
+            "Chiến tranh đơn phương",
+            "Chiến tranh cục bộ",
+            "Việt Nam hóa chiến tranh",
+            "Hòa bình đặc biệt"
+          ],
+          "correctIndex": 1,
+          "explanation": "Chiến tranh cục bộ là bước leo thang mới, Mỹ đưa quân trực tiếp tham chiến."
+        },
+        {
+          "id": "S3Q3",
+          "question": "Một yêu cầu lãnh đạo quan trọng ở miền Bắc giai đoạn này là gì?",
+          "options": [
+            "Dừng sản xuất để sơ tán toàn bộ",
+            "Vừa sản xuất vừa chiến đấu, bảo đảm chi viện miền Nam",
+            "Chỉ tập trung công nghiệp nhẹ",
+            "Đóng cửa giao thông liên vùng"
+          ],
+          "correctIndex": 1,
+          "explanation": "Miền Bắc phải đồng thời bảo đảm kinh tế, quốc phòng và chi viện."
+        },
+        {
+          "id": "S3Q4",
+          "question": "Phong trào thanh niên tiêu biểu ở miền Bắc sau 1964 là gì?",
+          "options": [
+            "Ba sẵn sàng",
+            "Ba đảm đang",
+            "Năm tốt",
+            "Đồng khởi"
+          ],
+          "correctIndex": 0,
+          "explanation": "Phong trào Ba sẵn sàng phát triển mạnh trong thanh niên miền Bắc."
+        },
+        {
+          "id": "S3Q5",
+          "question": "Phong trào tiêu biểu của thanh niên miền Nam trong kháng chiến chống Mỹ giai đoạn này là gì?",
+          "options": [
+            "Năm xung phong",
+            "Ba đảm đang",
+            "Hai tốt",
+            "Sóng Duyên Hải"
+          ],
+          "correctIndex": 0,
+          "explanation": "Năm xung phong là phong trào tiêu biểu của thanh niên miền Nam."
+        },
+        {
+          "id": "S3Q6",
+          "question": "Trận Vạn Tường (1965) có ý nghĩa nổi bật nào?",
+          "options": [
+            "Mỹ giành thắng lợi quyết định",
+            "Mở đầu khả năng đánh thắng quân Mỹ trực tiếp tham chiến",
+            "Chấm dứt hoàn toàn chiến tranh",
+            "Không có ý nghĩa chiến lược"
+          ],
+          "correctIndex": 1,
+          "explanation": "Vạn Tường chứng minh khả năng đánh thắng quân Mỹ của quân dân ta."
+        },
+        {
+          "id": "S3Q7",
+          "question": "Trong điều kiện chiến tranh leo thang, mối quan hệ hai miền được Đảng xác định ra sao?",
+          "options": [
+            "Miền Bắc và miền Nam hoạt động tách rời",
+            "Miền Bắc là hậu phương lớn, miền Nam là tiền tuyến lớn",
+            "Miền Nam là hậu phương duy nhất",
+            "Chỉ ưu tiên miền Bắc"
+          ],
+          "correctIndex": 1,
+          "explanation": "Quan hệ hậu phương lớn - tiền tuyến lớn là hạt nhân chỉ đạo chiến lược."
+        },
+        {
+          "id": "S3Q8",
+          "question": "Nếu trả lời sai liên tiếp trong stage 3, game phạt tăng chỉ số nào nhiều nhất để mô phỏng nguy cơ thực tế?",
+          "options": [
+            "Influence",
+            "Exposure",
+            "KnowledgeScore",
+            "ComboScore"
+          ],
+          "correctIndex": 1,
+          "explanation": "Exposure tăng phản ánh nguy cơ lộ mạng lưới và bị đánh phá."
+        },
+        {
+          "id": "S3Q9",
+          "question": "Mục tiêu cốt lõi của chỉ đạo chiến lược giai đoạn 1964-1965 là gì?",
+          "options": [
+            "Né tránh mọi xung đột",
+            "Giữ vững thế chủ động, làm thất bại từng bước leo thang chiến tranh của Mỹ",
+            "Chỉ tập trung ngoại giao",
+            "Từ bỏ chi viện miền Nam"
+          ],
+          "correctIndex": 1,
+          "explanation": "Đảng chủ trương kiên quyết chống leo thang, giữ chủ động chiến lược."
+        },
+        {
+          "id": "S3Q10",
+          "question": "Điều kiện qua màn cuối trong game nhấn mạnh bài học lịch sử nào?",
+          "options": [
+            "Chỉ cần quân sự, không cần chính trị",
+            "Phải kết hợp xây dựng hậu phương, chi viện tiền tuyến và lãnh đạo thống nhất",
+            "Chỉ cần trả lời đúng câu hỏi",
+            "Chỉ cần tăng tốc độ thao tác tay"
+          ],
+          "correctIndex": 1,
+          "explanation": "Bài học trung tâm là kết hợp toàn diện các mặt trận dưới sự lãnh đạo thống nhất."
+        }
+      ]
+    }
+  ]
+}

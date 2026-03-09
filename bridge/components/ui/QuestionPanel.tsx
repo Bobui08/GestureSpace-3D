@@ -1,207 +1,160 @@
-import React, { useState, useEffect } from 'react';
-import { useGameStore } from '../../store/gameStore';
-
-interface Feedback {
-    isCorrect: boolean;
-    text: string;
-}
+import React, { useMemo, useState } from "react";
+import { useGameStore } from "../../store/gameStore";
+import { STAGE_META } from "../../data/gameData";
 
 const QuestionPanel = () => {
-    const { gameState, currentQuestion, answerQuiz } = useGameStore();
-    const [selectedOption, setSelectedOption] = useState<number | null>(null);
-    const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const {
+    gameState,
+    currentQuestion,
+    answerQuiz,
+    currentStage,
+    stageQuizProgress,
+  } = useGameStore();
+  const [locked, setLocked] = useState(false);
+  const [feedback, setFeedback] = useState<string>("");
 
-    // Reset state when new question appears
-    useEffect(() => {
-        if (currentQuestion) {
-            console.log('New question loaded, resetting state');
-            setSelectedOption(null);
-            setFeedback(null);
-        }
-    }, [currentQuestion?.id]); // Reset when question ID changes
+  const stageMeta = STAGE_META[currentStage];
+  const stageProgress = stageQuizProgress[currentStage] ?? {
+    asked: 0,
+    correct: 0,
+    usedQuestionIds: [],
+  };
 
-    if (gameState !== 'QUIZ' || !currentQuestion) return null;
+  const totalQuiz = stageMeta?.quizCount ?? 0;
+  const currentIndex = useMemo(
+    () => Math.min(stageProgress.asked + 1, totalQuiz || stageProgress.asked + 1),
+    [stageProgress.asked, totalQuiz]
+  );
 
-    const handleAnswer = (index: number) => {
-        console.log('User clicked answer:', index);
-        const result = answerQuiz(index);
-        if (result.correct) {
-            setFeedback({ isCorrect: true, text: 'CHÍNH XÁC! +10 điểm' });
-        } else {
-            setFeedback({ isCorrect: false, text: `SAI RỒI! Gợi ý: ${result.hint}` });
-        }
-    };
+  if (gameState !== "QUIZ" || !currentQuestion) return null;
 
-    return (
-        <div style={styles.overlay}>
-            <div style={styles.card}>
-                <div style={styles.neonBorder}></div>
-                <h2 style={styles.questionTitle}>CÂU HỎI KIẾN THỨC</h2>
-                <div style={styles.questionText}>{currentQuestion.question}</div>
+  const handleAnswer = (index: number) => {
+    if (locked) return;
+    setLocked(true);
+    const result = answerQuiz(index);
+    const text = result.correct ? "Dung. " : "Chua dung. ";
+    setFeedback(`${text}${result.explanation ?? ""}`);
+    setTimeout(() => setLocked(false), 300);
+  };
 
-                <div style={styles.optionsList}>
-                    {currentQuestion.options.map((opt, idx) => (
-                        <button
-                            key={idx}
-                            className={`quiz-option-btn`}
-                            style={{
-                                ...(feedback && !feedback.isCorrect && idx === selectedOption ? styles.wrongOption : {}),
-                                ...(feedback && feedback.isCorrect && idx === selectedOption ? styles.correctOption : {})
-                            }}
-                            onClick={() => {
-                                // Allow click if no feedback OR if feedback is WRONG (not correct)
-                                if (!feedback || !feedback.isCorrect) {
-                                    setSelectedOption(idx);
-                                    handleAnswer(idx);
-                                }
-                            }}
-                            // Only disable ALL buttons if the answer is CORRECT (to prevent spamming)
-                            disabled={feedback && feedback.isCorrect}
-                        >
-                            <span style={styles.optionIndex}>{String.fromCharCode(65 + idx)}</span>
-                            {opt}
-                        </button>
-                    ))}
-                </div>
-
-                {feedback && (
-                    <div style={{
-                        ...styles.feedback,
-                        ...(feedback.isCorrect ? styles.feedbackCorrect : styles.feedbackWrong)
-                    }}>
-                        {feedback.text}
-                    </div>
-                )}
-            </div>
+  return (
+    <div style={styles.overlay}>
+      <div style={styles.card}>
+        <div style={styles.header}>
+          <span style={styles.badge}>
+            {stageMeta?.shortTitle} · Cau {currentIndex}/{totalQuiz}
+          </span>
+          <span style={styles.subtitle}>{stageMeta?.title}</span>
         </div>
-    );
+
+        <h2 style={styles.question}>{currentQuestion.question}</h2>
+
+        <div style={styles.options}>
+          {currentQuestion.options.map((opt, idx) => (
+            <button
+              key={`${currentQuestion.id}-${idx}`}
+              style={styles.optionBtn}
+              className="quiz-option-btn"
+              onClick={() => handleAnswer(idx)}
+              disabled={locked}
+            >
+              <span style={styles.optionLabel}>{String.fromCharCode(65 + idx)}</span>
+              <span>{opt}</span>
+            </button>
+          ))}
+        </div>
+
+        {feedback && <div style={styles.feedback}>{feedback}</div>}
+      </div>
+    </div>
+  );
 };
 
-const styles: { [key: string]: React.CSSProperties } = {
-    overlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'rgba(10, 10, 15, 0.95)',
-        backdropFilter: 'blur(20px)',
-        zIndex: 150,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        pointerEvents: 'auto',
-    },
-    card: {
-        width: '700px',
-        maxWidth: '90%',
-        background: 'rgba(20, 20, 30, 0.8)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '20px',
-        padding: '40px',
-        boxShadow: '0 0 50px rgba(0, 243, 255, 0.3), 0 0 100px rgba(255, 0, 255, 0.2)',
-        textAlign: 'center',
-        border: '1px solid rgba(0, 243, 255, 0.3)',
-        position: 'relative',
-        animation: 'slideInUp 0.5s ease-out',
-    },
-    neonBorder: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: '20px',
-        padding: '2px',
-        background: 'linear-gradient(45deg, #00f3ff, #ff00ff, #9d00ff, #00f3ff)',
-        backgroundSize: '300% 300%',
-        opacity: 0.3,
-        zIndex: -1,
-        animation: 'gradientShift 3s ease infinite',
-    },
-    questionTitle: {
-        background: 'linear-gradient(90deg, #00f3ff, #ff00ff)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        marginBottom: '25px',
-        fontSize: '1.5rem',
-        fontWeight: '800',
-        textTransform: 'uppercase',
-        letterSpacing: '3px',
-        filter: 'drop-shadow(0 0 15px rgba(0, 243, 255, 0.7))',
-    },
-    questionText: {
-        color: '#fff',
-        fontSize: '1.5rem',
-        marginBottom: '35px',
-        lineHeight: '1.7',
-        textShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
-    },
-    optionsList: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-    },
-    optionBtn: {
-        padding: '18px 20px',
-        color: '#fff',
-        background: 'rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(0, 243, 255, 0.3)',
-        borderRadius: '12px',
-        fontSize: '1.1rem',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        textAlign: 'left' as const,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '15px',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-    },
-    optionIndex: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '35px',
-        height: '35px',
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #00f3ff, #ff00ff)',
-        color: '#000',
-        fontWeight: '700',
-        fontSize: '1rem',
-        flexShrink: 0,
-    },
-    wrongOption: {
-        background: 'rgba(255, 82, 82, 0.2)',
-        borderColor: '#ff5252',
-        boxShadow: '0 0 20px rgba(255, 82, 82, 0.5)',
-    },
-    correctOption: {
-        background: 'rgba(0, 255, 136, 0.2)',
-        borderColor: '#00ff88',
-        boxShadow: '0 0 20px rgba(0, 255, 136, 0.5)',
-    },
-    feedback: {
-        marginTop: '25px',
-        fontWeight: '700',
-        fontSize: '1.3rem',
-        padding: '15px',
-        borderRadius: '10px',
-        textTransform: 'uppercase',
-        letterSpacing: '2px',
-    },
-    feedbackCorrect: {
-        color: '#00ff88',
-        background: 'rgba(0, 255, 136, 0.1)',
-        border: '1px solid #00ff88',
-        textShadow: '0 0 15px #00ff88',
-    },
-    feedbackWrong: {
-        color: '#ff5252',
-        background: 'rgba(255, 82, 82, 0.1)',
-        border: '1px solid #ff5252',
-        textShadow: '0 0 15px #ff5252',
-    }
+const styles: Record<string, React.CSSProperties> = {
+  overlay: {
+    position: "absolute",
+    inset: 0,
+    background: "rgba(2, 6, 23, 0.82)",
+    backdropFilter: "blur(4px)",
+    zIndex: 280,
+    display: "grid",
+    placeItems: "center",
+    padding: 20,
+  },
+  card: {
+    width: "min(860px, 92vw)",
+    borderRadius: 16,
+    border: "1px solid rgba(125, 211, 252, 0.45)",
+    background: "rgba(15, 23, 42, 0.96)",
+    boxShadow: "0 24px 80px rgba(2, 132, 199, 0.2)",
+    padding: 24,
+  },
+  header: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    marginBottom: 14,
+  },
+  badge: {
+    width: "fit-content",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.7,
+    background: "rgba(14, 116, 144, 0.35)",
+    border: "1px solid rgba(125, 211, 252, 0.45)",
+    borderRadius: 999,
+    padding: "5px 10px",
+    color: "#bae6fd",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#cbd5e1",
+  },
+  question: {
+    margin: "0 0 18px 0",
+    color: "#f8fafc",
+    lineHeight: 1.5,
+    fontWeight: 600,
+  },
+  options: {
+    display: "grid",
+    gap: 10,
+  },
+  optionBtn: {
+    borderRadius: 12,
+    border: "1px solid rgba(148, 163, 184, 0.45)",
+    background: "rgba(30, 41, 59, 0.85)",
+    color: "#e2e8f0",
+    padding: "12px 14px",
+    textAlign: "left",
+    fontSize: 15,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+  },
+  optionLabel: {
+    width: 26,
+    height: 26,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#0ea5e9",
+    color: "#082f49",
+    fontWeight: 700,
+    flexShrink: 0,
+  },
+  feedback: {
+    marginTop: 14,
+    color: "#c7f9cc",
+    fontSize: 14,
+    lineHeight: 1.4,
+    padding: "10px 12px",
+    borderRadius: 10,
+    border: "1px solid rgba(34, 197, 94, 0.4)",
+    background: "rgba(20, 83, 45, 0.4)",
+  },
 };
 
 export default QuestionPanel;

@@ -15,7 +15,7 @@ import SocialEnvironment from './3d/SocialEnvironment';
 
 const Game = () => {
     const { videoRef, leftHand, rightHand, gestureLeft, gestureRight } = useHandTracking();
-    const { gameState, updateStageTime } = useGameStore();
+    const { gameState, gamePhase, updateStageTime } = useGameStore();
 
     // Update timer every second when playing
     // Update timer every second when playing
@@ -24,9 +24,9 @@ const Game = () => {
             const interval = setInterval(() => {
                 const state = useGameStore.getState();
                 if (state.gamePhase === 'DEFEND') {
+                    const nextTime = Math.max(0, state.defenseTimeLeft - 1);
                     state.decrementDefenseTime();
-                    if (state.defenseTimeLeft <= 0) {
-                        // End Defense -> Go to Quiz
+                    if (nextTime <= 0) {
                         state.setGamePhase('BUILD');
                         state.transitionToQuiz();
                     }
@@ -89,7 +89,7 @@ const Game = () => {
                             />
 
                             {/* Render Game Scene (Building) */}
-                            {useGameStore.getState().gamePhase === 'BUILD' && (
+                            {gamePhase === 'BUILD' && (
                                 <Scene
                                     leftHand={leftHand}
                                     rightHand={rightHand}
@@ -99,7 +99,7 @@ const Game = () => {
                             )}
 
                             {/* Render Defense Phase */}
-                            {useGameStore.getState().gamePhase === 'DEFEND' && (
+                            {gamePhase === 'DEFEND' && (
                                 <DefensePhase leftHand={leftHand} rightHand={rightHand} />
                             )}
                         </>

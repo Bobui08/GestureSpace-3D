@@ -1,153 +1,103 @@
-🎮 THE BRIDGE OF GENERATIONS – LUẬT LỆ CHÍNH THỨC
-🧩 1. Mục tiêu của trò chơi
-
-Người chơi phải xây dựng cây cầu 3D nối hai thế hệ:
-
-Bên trái: Thế hệ lớn (ông bà, cha mẹ) – đại diện cho giá trị truyền thống.
-
-Bên phải: Thế hệ trẻ – đại diện cho giá trị hiện đại, tiến bộ.
-
-Cây cầu chỉ có thể hoàn thiện khi người chơi kéo – thả – đặt đúng các Giá trị Gia đình XHCN để dung hòa mâu thuẫn.
-
-✋ 2. Điều khiển bằng cử chỉ tay
-
-Hệ thống nhận diện bàn tay (MediaPipe / Gemini 3):
-
-Cử chỉ	Chức năng trong game
-✋ Xòe tay	Bắt lấy một “viên giá trị 3D”
-✊ Nắm tay	Thả viên giá trị vào đúng vị trí
-👉 Chỉ tay	Chọn thông tin / đọc câu hỏi
-✋ Vuốt sang trái	Quay về nhóm giá trị truyền thống
-✋ Vuốt sang phải	Quay về nhóm giá trị hiện đại
-👐 Hai tay chụm vào	Xác nhận lựa chọn / hợp nhất giá trị
-
-=> Điều khiển tự nhiên như đang “xây cầu thật”.
-
-🧱 3. Các loại “viên giá trị 3D”
-
-Website có 10 “viên đá giá trị” (Value Stones), gồm:
-
-Nhóm 1: Giá trị Truyền thống
-
-Tôn trọng người lớn
-
-Hiếu thảo
-
-Ổn định gia đình
-
-Giữ gìn văn hóa
-
-Lắng nghe – nhẫn nhịn
-
-Nhóm 2: Giá trị Hiện đại – Tiến bộ
-
-Bình đẳng giới
-
-Hôn nhân tự nguyện
-
-Giao tiếp hai chiều
-
-Tự chủ cá nhân
-
-Phát triển kinh tế – tri thức
-
-🏗️ 4. Luật xây cầu
-
-Cây cầu gồm 5 trụ chính.
-Mỗi trụ yêu cầu 1 giá trị truyền thống + 1 giá trị hiện đại ghép lại với nhau.
-
-💡 Quy tắc:
-
-Người chơi phải kéo đúng 2 viên giá trị tương thích để gắn vào 1 trụ.
-
-Nếu ghép sai → trụ rung mạnh → hạt bị vỡ.
-
-Ghép đúng → trụ phát sáng màu vàng, tiến lên bước tiếp theo.
-
-🔧 Ví dụ ghép đúng:
-
-Tôn trọng người lớn + Giao tiếp hai chiều → Trụ 1: “Hòa hợp”
-
-Giữ gìn văn hóa + Hôn nhân tự nguyện → Trụ 2: “Kết nối giá trị”
-
-❓ 5. Hệ thống câu hỏi
-
-Sau khi ghép mỗi trụ, website tự động mở 1 câu hỏi kiến thức thuộc Chương 7:
-
-Ví dụ:
-
-“Tại sao mâu thuẫn thế hệ ngày càng tăng trong xã hội hiện đại?”
-
-“Gia đình thời kỳ quá độ có đặc điểm gì khác với gia đình truyền thống?”
-
-“Vì sao bình đẳng giới là điều kiện của hôn nhân tiến bộ?”
-
-Trả lời đúng → cây cầu ổn định.
-Trả lời sai → cầu nghiêng → phải ghép lại giá trị cho đúng.
-
-🚨 6. Các tình huống ngẫu nhiên (Random Events)
-
-Để tăng tính thú vị, thỉnh thoảng game xuất hiện:
-
-⛈️ Sự kiện “Bão Gia đình”
-
-Gió thổi mạnh
-
-Cây cầu lung lay
-
-Người chơi phải giơ hai tay giữ ổn định cầu trong 3 giây
-
-🔥 Sự kiện “Mâu thuẫn Thế hệ”
-
-Hai bên nhân vật bắt đầu tranh cãi.
-Người chơi phải:
-
-Dùng cử chỉ ✋ xòe tay
-
-Kéo 1 giá trị phù hợp vào giữa họ để “hóa giải”
-
-Ví dụ: kéo “Lắng nghe” hoặc “Tôn trọng”.
-
-🌉 7. Điều kiện chiến thắng
-
-Người chơi chiến thắng khi:
-
-✔️ Hoàn thành 5 trụ giá trị
-✔️ Vượt qua tất cả câu hỏi
-✔️ Ổn định cây cầu qua mọi “Sự kiện ngẫu nhiên”
-
-Cây cầu hoàn thiện sẽ sáng rực và hai thế hệ bước qua, ôm nhau → hiệu ứng hạt 3D nổ sáng toàn màn hình.
-
-👑 8. Chấm điểm
-
-Hệ thống tính điểm theo:
-
-Độ chính xác khi ghép giá trị
-
-Thời gian hoàn thành
-
-Số lần cầu rung vỡ
-
-Câu hỏi trả lời đúng ngay lần đầu
-
-Xếp hạng:
-
-A+: Kiến tạo Gia đình XHCN xuất sắc
-
-A : Người kết nối thế hệ
-
-B : Gia đình cần củng cố thêm
-
-C : Cầu đổ → chơi lại
-
-🧠 9. Ý nghĩa giáo dục
-
-Game giúp người chơi:
-
-Hiểu bản chất mâu thuẫn truyền thống – hiện đại
-
-Nắm rõ chức năng gia đình, vai trò giáo dục, hôn nhân tiến bộ
-
-Thực hành cách “kết nối” hai hệ giá trị → đúng tinh thần Chương 7
-
-Học bằng trải nghiệm chứ không phải học thuộc
+# RULES GAME - REVOLUTION NETWORK (1954-1965)
+
+## 1) Mục tiêu học tập và mục tiêu chơi
+- Người chơi xây dựng và mở rộng "Mạng lưới Cách mạng" trên bản đồ 3D hai miền.
+- Mỗi màn tương ứng một giai đoạn lịch sử: 1954-1960, 1961-1963, 1964-1965.
+- Muốn qua màn, người chơi phải:
+  - Đạt ngưỡng độ phủ mạng lưới.
+  - Trả lời đúng bộ câu hỏi của giai đoạn đó.
+
+## 2) Biến số chính trong game
+- `Influence` (0-100): mức ảnh hưởng cách mạng trên bản đồ.
+- `Stability` (0-100): độ bền vững của mạng lưới trước truy quét.
+- `Logistics` (0-100): năng lực vận chuyển và tiếp tế Bắc - Nam.
+- `Exposure` (0-100): mức lộ mạng lưới; quá cao sẽ bị tổn thất lớn.
+- `KnowledgeScore`: điểm trả lời câu hỏi lịch sử.
+
+## 3) Node trong mạng lưới
+- `CoSoQuanChung` (cơ sở quần chúng): tăng Influence bền vững.
+- `DuKich` (du kích): tăng khả năng giữ node khi bị tấn công.
+- `TuyenVanChuyen` (đường vận chuyển): tăng Logistics, giảm thời gian chi viện.
+- `VungAnToan` (vùng an toàn): tăng Stability, giảm Exposure.
+- `DiemChiHuy` (điểm chỉ huy): node trung tâm, mở khóa kỹ năng chi viện.
+
+## 4) Luật nối node
+- Chỉ nối được khi có đường đi logic:
+  - `CoSoQuanChung -> DuKich`
+  - `DuKich -> TuyenVanChuyen`
+  - `TuyenVanChuyen -> VungAnToan`
+  - `VungAnToan -> DiemChiHuy` (hoặc ngược lại khi đã mở khóa màn cao)
+- Nối đúng:
+  - +Influence, +Stability.
+  - Mở rộng vùng sáng trên bản đồ.
+- Nối sai:
+  - +Exposure.
+  - Node bị "nhiễu", khóa tạm thời 5-10 giây.
+
+## 5) Điều khiển 2 tay (dùng lại hand tracking)
+- Tay trái:
+  - Pinch (ngón cái + trỏ): chọn node nguồn.
+  - Di chuyển bàn tay: kéo node theo không gian 3D.
+  - Open palm 1.5 giây: hủy thao tác kéo.
+- Tay phải:
+  - Pinch: chọn node đích để tạo liên kết.
+  - Fist 1 giây: kích hoạt "Chi viện nhanh" (cooldown).
+  - Swipe phải/trái: chuyển tab câu hỏi hoặc xem giải thích.
+- Hai tay:
+  - Hai lòng bàn tay mở đồng thời 2 giây: xác nhận trả lời câu hỏi.
+
+## 6) Cấu trúc 1 vòng chơi (core loop)
+1. Quan sát bản đồ và trạng thái 4 chỉ số chính.
+2. Dùng tay trái chọn node nguồn, tay phải chọn node đích để nối.
+3. Kích hoạt chi viện khi tuyến hậu cần nghẽn.
+4. Khi đạt checkpoint, hệ thống bật câu hỏi lịch sử.
+5. Trả lời đúng để mở node cấp cao và tiếp tục mở rộng mạng.
+
+## 7) Cơ chế câu hỏi
+- Mỗi câu có 4 đáp án, 1 đáp án đúng.
+- Trả lời đúng:
+  - +KnowledgeScore.
+  - +Influence hoặc +Stability (thưởng nhỏ).
+- Trả lời sai:
+  - -Stability hoặc +Exposure.
+  - Hiện giải thích ngắn để người học hiểu logic lịch sử.
+- Mỗi giai đoạn yêu cầu tối thiểu 70% câu đúng để qua màn.
+
+## 8) Sự kiện ngẫu nhiên (Random Events)
+- `Càn quét khu vực`: giảm Stability của node tiền tuyến.
+- `Đứt tuyến tiếp tế`: giảm Logistics tạm thời.
+- `Lộ cơ sở`: tăng Exposure tại cụm node vừa mở rộng.
+- `Thời cơ chính trị`: tăng thưởng Influence nếu trả lời đúng câu hỏi kế tiếp.
+
+## 9) Điều kiện thắng/thua theo màn
+- Thắng màn:
+  - Đạt ngưỡng Influence yêu cầu.
+  - Trả lời đúng >= 70% câu hỏi màn.
+  - `Stability > 0`.
+- Thua màn:
+  - `Stability = 0`, hoặc
+  - `Exposure >= 100`, hoặc
+  - Hết thời gian nhiệm vụ màn.
+
+## 10) Ngưỡng từng giai đoạn
+- Giai đoạn 1 (1954-1960):
+  - Influence >= 45, Knowledge >= 70%.
+- Giai đoạn 2 (1961-1963):
+  - Influence >= 65, Logistics >= 50, Knowledge >= 70%.
+- Giai đoạn 3 (1964-1965):
+  - Influence >= 80, Stability >= 60, Knowledge >= 75%.
+
+## 11) Chấm điểm cuối game
+- `FinalScore = Influence*0.35 + Stability*0.25 + Logistics*0.15 + KnowledgeScore*0.25`
+- Xếp hạng:
+  - S: 90-100
+  - A: 80-89
+  - B: 65-79
+  - C: 50-64
+  - D: < 50
+
+## 12) Ý nghĩa học thuật
+- Làm rõ vai trò lãnh đạo của Đảng trong việc:
+  - Xây dựng miền Bắc thành hậu phương lớn.
+  - Chỉ đạo cách mạng miền Nam phù hợp từng giai đoạn.
+  - Kết hợp đấu tranh chính trị, quân sự và hậu cần Bắc - Nam.

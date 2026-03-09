@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Family Builder 3D</title>
+        <title>Revolution Network 3D (1954-1965)</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <Game />

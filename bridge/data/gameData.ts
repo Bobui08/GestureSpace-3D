@@ -1,207 +1,270 @@
 export const STAGES = {
-    FOUNDATION: 'FOUNDATION',
-    PILLARS: 'PILLARS',
-    WALLS: 'WALLS',
-    ROOF: 'ROOF',
-    COMPLETED: 'COMPLETED',
-};
+  STAGE_1_1954_1960: "stage_1_1954_1960",
+  STAGE_2_1961_1963: "stage_2_1961_1963",
+  STAGE_3_1964_1965: "stage_3_1964_1965",
+  COMPLETED: "COMPLETED",
+} as const;
 
-export const BLOCKS = {
-    [STAGES.FOUNDATION]: [
-        { id: 'f1', text: 'Gia đình là tế bào của xã hội', type: 'FOUNDATION' },
-        { id: 'f2', text: 'Gia đình là tổ ấm', type: 'FOUNDATION' },
-        { id: 'f3', text: 'Gia đình là cầu nối cá nhân – xã hội', type: 'FOUNDATION' },
-    ],
-    [STAGES.PILLARS]: [
-        { id: 'p1', text: 'Tái sản xuất con người', type: 'PILLARS' },
-        { id: 'p2', text: 'Nuôi dưỡng – giáo dục', type: 'PILLARS' },
-        { id: 'p3', text: 'Kinh tế – tiêu dùng', type: 'PILLARS' },
-        { id: 'p4', text: 'Tâm sinh lý – tình cảm', type: 'PILLARS' },
-    ],
-    [STAGES.WALLS]: [
-        { id: 'w1', text: 'Tự nguyện – tình yêu', type: 'WALLS' },
-        { id: 'w2', text: 'Một vợ một chồng', type: 'WALLS' },
-        { id: 'w3', text: 'Bình đẳng vợ chồng', type: 'WALLS' },
-        { id: 'w4', text: 'Pháp luật bảo vệ', type: 'WALLS' },
-    ],
-    [STAGES.ROOF]: [
-        { id: 'r1', text: 'Tăng cường lãnh đạo & nhận thức', type: 'ROOF' },
-        { id: 'r2', text: 'Phát triển kinh tế – nâng cao đời sống', type: 'ROOF' },
-        { id: 'r3', text: 'Kết hợp truyền thống – hiện đại', type: 'ROOF' },
-        { id: 'r4', text: 'Gia đình văn hóa:\nấm no – bình đẳng – tiến bộ – hạnh phúc', type: 'ROOF' },
-    ],
-};
+export type StageId = (typeof STAGES)[keyof typeof STAGES];
 
-export const QUESTIONS = [
-    {
-        id: 'q1',
-        question: 'Chức năng nào được coi là đặc thù nhất của gia đình?',
-        options: [
-            'Tái sản xuất con người',
-            'Phát triển kinh tế',
-            'Tham gia hoạt động chính trị',
-            'Bảo vệ môi trường'
-        ],
-        correctAnswer: 0,
-        hint: 'Đây là chức năng duy trì nòi giống.'
-    },
-    {
-        id: 'q2',
-        question: 'Hôn nhân tiến bộ dựa trên cơ sở nào?',
-        options: [
-            'Môn đăng hộ đối',
-            'Tự nguyện và tình yêu chân chính',
-            'Sự sắp đặt của cha mẹ',
-            'Lợi ích kinh tế'
-        ],
-        correctAnswer: 1,
-        hint: 'Tình yêu là nền tảng của hạnh phúc.'
-    },
-    {
-        id: 'q3',
-        question: 'Gia đình văn hóa là gia đình như thế nào?',
-        options: [
-            'Chỉ cần giàu có',
-            'Ấm no, bình đẳng, tiến bộ, hạnh phúc',
-            'Đông con nhiều cháu',
-            'Có quyền lực trong xã hội'
-        ],
-        correctAnswer: 1,
-        hint: 'Phản ánh sự toàn diện về vật chất và tinh thần.'
-    },
-    {
-        id: 'q4',
-        question: 'Cơ sở chính trị - xã hội của gia đình trong thời kỳ quá độ là gì?',
-        options: [
-            'Kinh tế tư nhân',
-            'Nhà nước XHCN & Luật pháp',
-            'Truyền thống dòng họ',
-            'Tôn giáo'
-        ],
-        correctAnswer: 1,
-        hint: 'Được bảo vệ bởi thiết chế cao nhất.'
-    },
-    {
-        id: 'q5',
-        question: 'Chế độ hôn nhân trong gia đình quá độ lên CNXH là:',
-        options: [
-            'Đa thê',
-            'Một vợ một chồng',
-            'Đa phu',
-            'Tự do tuyệt đối'
-        ],
-        correctAnswer: 1,
-        hint: 'Đảm bảo sự bình đẳng và chung thủy.'
-    },
-    {
-        id: 'q6',
-        question: 'Gia đình có trách nhiệm gì trong việc giáo dục con cái?',
-        options: [
-            'Khoán trắng cho nhà trường',
-            'Nuôi dưỡng và giáo dục nhân cách',
-            'Chỉ lo ăn mặc',
-            'Không cần quan tâm'
-        ],
-        correctAnswer: 1,
-        hint: 'Gia đình là trường học đầu tiên.'
-    },
-    {
-        id: 'q7',
-        question: 'Chức năng kinh tế của gia đình thể hiện ở chỗ:',
-        options: [
-            'Tổ chức sản xuất và tiêu dùng hợp lý',
-            'Chỉ tiêu tiền, không làm ra tiền',
-            'Phụ thuộc vào trợ cấp',
-            'Cạnh tranh gay gắt'
-        ],
-        correctAnswer: 0,
-        hint: 'Đảm bảo đời sống vật chất.'
-    },
-    {
-        id: 'q8',
-        question: 'Sự bình đẳng vợ chồng được hiểu là:',
-        options: [
-            'Ai kiếm nhiều tiền hơn được quyền quyết định',
-            'Bình đẳng về nghĩa vụ, quyền lợi và cơ hội',
-            'Vợ phải nghe lời chồng',
-            'Chồng phải nghe lời vợ'
-        ],
-        correctAnswer: 1,
-        hint: 'Tôn trọng lẫn nhau.'
-    },
-    {
-        id: 'q9',
-        question: 'Yếu tố nào giúp hòa giải "Mâu thuẫn thế hệ"?',
-        options: [
-            'Áp đặt ý kiến',
-            'Lắng nghe, thấu hiểu và giáo dục',
-            'Sống tách biệt',
-            'Bỏ qua không giải quyết'
-        ],
-        correctAnswer: 1,
-        hint: 'Giao tiếp là chìa khóa.'
-    },
-    {
-        id: 'q10',
-        question: 'Để xây dựng gia đình trong thời kỳ quá độ, cần kết hợp yếu tố nào?',
-        options: [
-            'Chỉ cần truyền thống',
-            'Chỉ cần hiện đại',
-            'Truyền thống và hiện đại',
-            'Học theo phương Tây'
-        ],
-        correctAnswer: 2,
-        hint: 'Kế thừa và phát triển.'
-    },
-    {
-        id: 'q11',
-        question: 'Gia đình là cầu nối giữa:',
-        options: [
-            'Cá nhân và Xã hội',
-            'Nhà trường và Xã hội',
-            'Vợ và Chồng',
-            'Ông bà và Cháu'
-        ],
-        correctAnswer: 0,
-        hint: 'Mối quan hệ biện chứng.'
-    },
-    {
-        id: 'q12',
-        question: 'Điều gì bảo vệ chế độ hôn nhân và gia đình?',
-        options: [
-            'Dư luận xã hội',
-            'Pháp luật',
-            'Tiền bạc',
-            'Lời hứa'
-        ],
-        correctAnswer: 1,
-        hint: 'Công cụ cưỡng chế và giáo dục của Nhà nước.'
-    }
-    // ... Questions ...
+export const STAGE_SEQUENCE: StageId[] = [
+  STAGES.STAGE_1_1954_1960,
+  STAGES.STAGE_2_1961_1963,
+  STAGES.STAGE_3_1964_1965,
 ];
 
-export const SLOTS = {
-    [STAGES.FOUNDATION]: [
-        { id: 'f_slot_1', pos: [-2, 0.75, 0] },
-        { id: 'f_slot_2', pos: [0, 0.75, 0] },
-        { id: 'f_slot_3', pos: [2, 0.75, 0] },
-    ],
-    [STAGES.PILLARS]: [
-        { id: 'p_slot_1', pos: [-1.5, 2.5, 1.5] },
-        { id: 'p_slot_2', pos: [1.5, 2.5, 1.5] },
-        { id: 'p_slot_3', pos: [-1.5, 2.5, -1.5] },
-        { id: 'p_slot_4', pos: [1.5, 2.5, -1.5] },
-    ],
-    [STAGES.WALLS]: [
-        { id: 'w_slot_1', pos: [0, 2.4, 1.5], rot: [0, 0, 0] },
-        { id: 'w_slot_2', pos: [0, 2.4, -1.5], rot: [0, 0, 0] },
-        { id: 'w_slot_3', pos: [-1.5, 2.4, 0], rot: [0, Math.PI / 2, 0] },
-        { id: 'w_slot_4', pos: [1.5, 2.4, 0], rot: [0, Math.PI / 2, 0] },
-    ],
-    [STAGES.ROOF]: [
-        { id: 'r_slot_1', pos: [-1, 5.5, 1] },
-        { id: 'r_slot_2', pos: [1, 5.5, 1] },
-        { id: 'r_slot_3', pos: [-1, 5.5, -1] },
-        { id: 'r_slot_4', pos: [1, 5.5, -1] },
-    ],
+export type NodeType =
+  | "CO_SO_QUAN_CHUNG"
+  | "DU_KICH"
+  | "TUYEN_VAN_CHUYEN"
+  | "VUNG_AN_TOAN"
+  | "DIEM_CHI_HUY";
+
+export interface GameBlock {
+  id: string;
+  text: string;
+  type: StageId;
+  nodeType: NodeType;
+}
+
+export const STAGE_META: Record<
+  StageId,
+  {
+    title: string;
+    shortTitle: string;
+    years: string;
+    image: string;
+    quizCount: number;
+    passRatio: number;
+    defenseDuration: number;
+    targets: {
+      influence: number;
+      stability: number;
+      logistics: number;
+      exposureMax: number;
+    };
+  }
+> = {
+  [STAGES.STAGE_1_1954_1960]: {
+    title: "Giữ lực lượng, xây nền, mở thế",
+    shortTitle: "Giai đoạn 1",
+    years: "1954-1960",
+    image: "Miền Bắc xây dựng chủ nghĩa xã hội.webp",
+    quizCount: 3,
+    passRatio: 0.7,
+    defenseDuration: 14,
+    targets: { influence: 45, stability: 35, logistics: 20, exposureMax: 95 },
+  },
+  [STAGES.STAGE_2_1961_1963]: {
+    title: "Phá Chiến tranh đặc biệt",
+    shortTitle: "Giai đoạn 2",
+    years: "1961-1963",
+    image: "Phong trào Đồng khởi miền Nam 1960.jpg",
+    quizCount: 3,
+    passRatio: 0.7,
+    defenseDuration: 18,
+    targets: { influence: 65, stability: 45, logistics: 50, exposureMax: 90 },
+  },
+  [STAGES.STAGE_3_1964_1965]: {
+    title: "Chống leo thang chiến tranh",
+    shortTitle: "Giai đoạn 3",
+    years: "1964-1965",
+    image: "Chiến tranh leo thang.jpg",
+    quizCount: 4,
+    passRatio: 0.75,
+    defenseDuration: 22,
+    targets: { influence: 80, stability: 60, logistics: 60, exposureMax: 85 },
+  },
+  [STAGES.COMPLETED]: {
+    title: "Hoàn thành chiến dịch",
+    shortTitle: "Hoàn thành",
+    years: "",
+    image: "bản đồ việt nam.jpg",
+    quizCount: 0,
+    passRatio: 1,
+    defenseDuration: 0,
+    targets: { influence: 0, stability: 0, logistics: 0, exposureMax: 100 },
+  },
 };
+
+export const NODE_ICON_FILES: Record<NodeType, string> = {
+  CO_SO_QUAN_CHUNG: "cơ sở.png",
+  DU_KICH: "du kích.png",
+  TUYEN_VAN_CHUYEN: "vận chuyển.png",
+  VUNG_AN_TOAN: "vùng an toàn.png",
+  DIEM_CHI_HUY: "chỉ huy.png",
+};
+
+export const BLOCKS: Record<StageId, GameBlock[]> = {
+  [STAGES.STAGE_1_1954_1960]: [
+    {
+      id: "s1-b1",
+      text: "Xây cơ sở quần chúng",
+      type: STAGES.STAGE_1_1954_1960,
+      nodeType: "CO_SO_QUAN_CHUNG",
+    },
+    {
+      id: "s1-b2",
+      text: "Tổ chức lực lượng du kích",
+      type: STAGES.STAGE_1_1954_1960,
+      nodeType: "DU_KICH",
+    },
+    {
+      id: "s1-b3",
+      text: "Mở tuyến vận chuyển cấp 1",
+      type: STAGES.STAGE_1_1954_1960,
+      nodeType: "TUYEN_VAN_CHUYEN",
+    },
+    {
+      id: "s1-b4",
+      text: "Thiết lập vùng an toàn",
+      type: STAGES.STAGE_1_1954_1960,
+      nodeType: "VUNG_AN_TOAN",
+    },
+    {
+      id: "s1-b5",
+      text: "Kích hoạt điểm chỉ huy ban đầu",
+      type: STAGES.STAGE_1_1954_1960,
+      nodeType: "DIEM_CHI_HUY",
+    },
+  ],
+  [STAGES.STAGE_2_1961_1963]: [
+    {
+      id: "s2-b1",
+      text: "Mở rộng cơ sở ở vùng trọng điểm",
+      type: STAGES.STAGE_2_1961_1963,
+      nodeType: "CO_SO_QUAN_CHUNG",
+    },
+    {
+      id: "s2-b2",
+      text: "Tăng cường du kích cơ động",
+      type: STAGES.STAGE_2_1961_1963,
+      nodeType: "DU_KICH",
+    },
+    {
+      id: "s2-b3",
+      text: "Nâng cấp tuyến vận chuyển",
+      type: STAGES.STAGE_2_1961_1963,
+      nodeType: "TUYEN_VAN_CHUYEN",
+    },
+    {
+      id: "s2-b4",
+      text: "Tạo vùng an toàn liên hoàn",
+      type: STAGES.STAGE_2_1961_1963,
+      nodeType: "VUNG_AN_TOAN",
+    },
+    {
+      id: "s2-b5",
+      text: "Mở điểm chỉ huy cấp 1",
+      type: STAGES.STAGE_2_1961_1963,
+      nodeType: "DIEM_CHI_HUY",
+    },
+    {
+      id: "s2-b6",
+      text: "Củng cố tuyến dự phòng",
+      type: STAGES.STAGE_2_1961_1963,
+      nodeType: "TUYEN_VAN_CHUYEN",
+    },
+  ],
+  [STAGES.STAGE_3_1964_1965]: [
+    {
+      id: "s3-b1",
+      text: "Mạng cơ sở bám dân",
+      type: STAGES.STAGE_3_1964_1965,
+      nodeType: "CO_SO_QUAN_CHUNG",
+    },
+    {
+      id: "s3-b2",
+      text: "Du kích chống càn quét",
+      type: STAGES.STAGE_3_1964_1965,
+      nodeType: "DU_KICH",
+    },
+    {
+      id: "s3-b3",
+      text: "Tuyến vận chuyển chiến lược",
+      type: STAGES.STAGE_3_1964_1965,
+      nodeType: "TUYEN_VAN_CHUYEN",
+    },
+    {
+      id: "s3-b4",
+      text: "Vùng an toàn liên khu",
+      type: STAGES.STAGE_3_1964_1965,
+      nodeType: "VUNG_AN_TOAN",
+    },
+    {
+      id: "s3-b5",
+      text: "Điểm chỉ huy trung tâm",
+      type: STAGES.STAGE_3_1964_1965,
+      nodeType: "DIEM_CHI_HUY",
+    },
+    {
+      id: "s3-b6",
+      text: "Trạm phục hồi hậu cần",
+      type: STAGES.STAGE_3_1964_1965,
+      nodeType: "TUYEN_VAN_CHUYEN",
+    },
+  ],
+  [STAGES.COMPLETED]: [],
+};
+
+export const SLOTS: Record<
+  StageId,
+  { id: string; pos: [number, number, number] }[]
+> = {
+  [STAGES.STAGE_1_1954_1960]: [
+    { id: "s1-slot-1", pos: [-3.2, 1.2, 0] },
+    { id: "s1-slot-2", pos: [-1.4, 2.2, 0] },
+    { id: "s1-slot-3", pos: [0.4, 1.2, 0] },
+    { id: "s1-slot-4", pos: [2.2, 2.1, 0] },
+    { id: "s1-slot-5", pos: [0, 3.2, 0] },
+  ],
+  [STAGES.STAGE_2_1961_1963]: [
+    { id: "s2-slot-1", pos: [-3.8, 1.4, 0] },
+    { id: "s2-slot-2", pos: [-2.0, 2.5, 0] },
+    { id: "s2-slot-3", pos: [-0.2, 1.4, 0] },
+    { id: "s2-slot-4", pos: [1.6, 2.5, 0] },
+    { id: "s2-slot-5", pos: [3.4, 1.5, 0] },
+    { id: "s2-slot-6", pos: [0.8, 3.4, 0] },
+  ],
+  [STAGES.STAGE_3_1964_1965]: [
+    { id: "s3-slot-1", pos: [-4.2, 1.6, 0] },
+    { id: "s3-slot-2", pos: [-2.2, 2.8, 0] },
+    { id: "s3-slot-3", pos: [-0.2, 1.5, 0] },
+    { id: "s3-slot-4", pos: [1.8, 2.8, 0] },
+    { id: "s3-slot-5", pos: [3.8, 1.6, 0] },
+    { id: "s3-slot-6", pos: [0.8, 4.0, 0] },
+  ],
+  [STAGES.COMPLETED]: [],
+};
+
+export const STAGE_LINKS: Record<StageId, [number, number][]> = {
+  [STAGES.STAGE_1_1954_1960]: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [1, 4],
+    [3, 4],
+  ],
+  [STAGES.STAGE_2_1961_1963]: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [2, 5],
+    [1, 5],
+    [3, 5],
+  ],
+  [STAGES.STAGE_3_1964_1965]: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [1, 5],
+    [3, 5],
+    [2, 5],
+  ],
+  [STAGES.COMPLETED]: [],
+};
+
+export const getImagePath = (fileName: string): string =>
+  encodeURI(`/images/${fileName}`);
