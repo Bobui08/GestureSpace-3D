@@ -1,33 +1,8 @@
 import { create } from "zustand";
 import questionBank from "../questions-revolution-network.json";
 import { BLOCKS, STAGES, STAGE_META, STAGE_SEQUENCE, type GameBlock } from "../data/gameData";
-import {
-  getDirectiveById,
-  getAvailableDirectives,
-  tickCooldowns,
-} from "../data/directiveCatalog";
-import {
-  CAMPAIGN_STAGE_TARGETS,
-  CAMPAIGN_PACING,
-  QUIZ_IMPACT,
-  rollTurnEvent,
-  getRegionById,
-  type CampaignMetrics as CampaignMetricsType,
-} from "../data/campaignConfig";
-import { getQuestionForStage } from "../data/quizAdapter";
 
 type GameState = "PRE_INTRO" | "INTRO" | "PLAYING" | "QUIZ" | "WON" | "GAME_OVER";
-type GameMode = "LEGACY" | "COMMAND_ROOM";
-type CampaignState =
-  | "PRE_INTRO"
-  | "BRIEFING"
-  | "TURN_PLANNING"
-  | "TURN_RESOLVE"
-  | "INTEL_QUIZ"
-  | "STAGE_REPORT"
-  | "STAGE_CLEAR"
-  | "CAMPAIGN_CLEAR"
-  | "GAME_OVER";
 
 interface Question {
   id: string;
@@ -43,38 +18,11 @@ interface StageQuizProgress {
   usedQuestionIds: string[];
 }
 
-interface CampaignMetrics {
-  control: number;
-  support: number;
-  logistics: number;
-  secrecy: number;
-  pressure: number;
-}
-
-interface CampaignQuizProgress {
-  askedIds: string[];
-  correct: number;
-  wrong: number;
-  currentQuestionId: string | null;
-}
-
-export interface TurnLogEntry {
-  turnIndex: number;
-  directiveId: string | null;
-  regionId: string | null;
-  eventId: string | null;
-  eventLabel: string | null;
-  metricsBefore: CampaignMetrics;
-  metricsAfter: CampaignMetrics;
-  quizResult: { correct: boolean; questionId: string } | null;
-}
-
 interface PlacedBlocks {
   [key: string]: GameBlock[];
 }
 
 interface GameStore {
-  gameMode: GameMode;
   gameState: GameState;
   score: number;
   currentStage: string;
@@ -118,43 +66,6 @@ interface GameStore {
   healHouse: (amount: number) => void;
   setDefenseTime: (time: number) => void;
   decrementDefenseTime: () => void;
-
-  campaignState: CampaignState;
-  maxTurnsPerStage: number;
-  turnIndex: number;
-  turnTimeLeft: number;
-  commandPoints: number;
-  selectedDirectiveId: string | null;
-  selectedRegionId: string | null;
-  activeEventId: string | null;
-  campaignMetrics: CampaignMetrics;
-  campaignQuiz: CampaignQuizProgress;
-  turnLog: TurnLogEntry[];
-  directiveCooldowns: Record<string, number>;
-
-  setGameMode: (mode: GameMode) => void;
-  startCampaignMode: () => void;
-  startCampaignStage: (stageId?: string) => void;
-  startCampaignTurn: () => void;
-  setTurnTimeLeft: (seconds: number) => void;
-  tickTurnTimer: () => void;
-  selectDirective: (directiveId: string | null) => void;
-  selectRegion: (regionId: string | null) => void;
-  setActiveEvent: (eventId: string | null) => void;
-  commitTurnCommand: () => { success: boolean; reason?: string };
-  resolveTurnOutcome: () => void;
-  enterQuizCheckpoint: () => void;
-  submitCampaignQuizAnswer: (answerIndex: number) => { correct: boolean; explanation?: string };
-  finishCampaignQuiz: () => void;
-  advanceCampaignFlow: () => void;
-
-  // ----------------------------------------------------------------------
-  // P4 — Virtual Cursor State
-  // ----------------------------------------------------------------------
-  cursorPos: { x: number; y: number } | null;
-  isPinching: boolean;
-  setCursorPos: (pos: { x: number; y: number } | null) => void;
-  setIsPinching: (isPinching: boolean) => void;
 }
 
 const clamp = (value: number, min = 0, max = 100) => Math.min(max, Math.max(min, value));
@@ -170,59 +81,6 @@ const createInitialQuizProgress = (): Record<string, StageQuizProgress> => ({
   [STAGES.STAGE_2_1961_1963]: { asked: 0, correct: 0, usedQuestionIds: [] },
   [STAGES.STAGE_3_1964_1965]: { asked: 0, correct: 0, usedQuestionIds: [] },
 });
-
-// CAMPAIGN_DIRECTIVES and CAMPAIGN_STAGE_TARGETS moved to data files
-// (directiveCatalog.ts and campaignConfig.ts)
-
-const createInitialCampaignMetrics = (): CampaignMetrics => ({
-  control: 30,
-  support: 45,
-  logistics: 35,
-  secrecy: 55,
-  pressure: 20,
-});
-
-const createInitialCampaignQuiz = (): CampaignQuizProgress => ({
-  askedIds: [],
-  correct: 0,
-  wrong: 0,
-  currentQuestionId: null,
-});
-
-const clampCampaignMetrics = (metrics: CampaignMetrics): CampaignMetrics => ({
-  control: clamp(metrics.control),
-  support: clamp(metrics.support),
-  logistics: clamp(metrics.logistics),
-  secrecy: clamp(metrics.secrecy),
-  pressure: clamp(metrics.pressure),
-});
-
-const applyCampaignDelta = (
-  metrics: CampaignMetrics,
-  delta: Partial<CampaignMetrics> | undefined
-): CampaignMetrics =>
-  clampCampaignMetrics({
-    control: metrics.control + (delta?.control ?? 0),
-    support: metrics.support + (delta?.support ?? 0),
-    logistics: metrics.logistics + (delta?.logistics ?? 0),
-    secrecy: metrics.secrecy + (delta?.secrecy ?? 0),
-    pressure: metrics.pressure + (delta?.pressure ?? 0),
-  });
-
-const isCampaignFailed = (metrics: CampaignMetrics) =>
-  metrics.pressure >= 100 || metrics.secrecy <= 0;
-
-const isCampaignStageTargetMet = (stageId: string, metrics: CampaignMetrics) => {
-  const target = CAMPAIGN_STAGE_TARGETS[stageId];
-  if (!target) return false;
-  return (
-    metrics.control >= target.control &&
-    metrics.support >= target.support &&
-    metrics.logistics >= target.logistics &&
-    metrics.secrecy >= target.secrecy &&
-    metrics.pressure <= target.pressure
-  );
-};
 
 const getQuestionsByStage = (stageId: string): Question[] => {
   const stageEntry = questionBank.stages.find((stage) => stage.stageId === stageId);
@@ -296,7 +154,6 @@ const isStageTargetMet = (
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  gameMode: "COMMAND_ROOM",
   gameState: "PRE_INTRO",
   gameStartTime: null,
   score: 0,
@@ -322,325 +179,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   houseHealth: 70,
   defenseTimeLeft: 20,
 
-  campaignState: "PRE_INTRO",
-  maxTurnsPerStage: CAMPAIGN_PACING.maxTurnsPerStage,
-  turnIndex: 0,
-  turnTimeLeft: CAMPAIGN_PACING.turnPlanningDuration,
-  commandPoints: CAMPAIGN_PACING.initialCommandPoints,
-  selectedDirectiveId: null,
-  selectedRegionId: null,
-  activeEventId: null,
-  campaignMetrics: createInitialCampaignMetrics(),
-  campaignQuiz: createInitialCampaignQuiz(),
-  turnLog: [],
-  directiveCooldowns: {},
-
-  // P4 — Virtual Cursor State
-  cursorPos: null,
-  isPinching: false,
-  setCursorPos: (pos) => set({ cursorPos: pos }),
-  setIsPinching: (isPinching) => set({ isPinching }),
-
-  setGameMode: (mode) => set({ gameMode: mode }),
   setGameState: (state: GameState) => set({ gameState: state }),
-
-  startCampaignMode: () => {
-    set({
-      gameMode: "COMMAND_ROOM",
-      gameState: "PLAYING",
-      currentStage: STAGES.STAGE_1_1954_1960,
-      campaignState: "BRIEFING",
-      maxTurnsPerStage: CAMPAIGN_PACING.maxTurnsPerStage,
-      turnIndex: 0,
-      turnTimeLeft: CAMPAIGN_PACING.turnPlanningDuration,
-      commandPoints: CAMPAIGN_PACING.initialCommandPoints,
-      selectedDirectiveId: null,
-      selectedRegionId: null,
-      activeEventId: null,
-      campaignMetrics: createInitialCampaignMetrics(),
-      campaignQuiz: createInitialCampaignQuiz(),
-      currentQuestion: null,
-      turnLog: [],
-      directiveCooldowns: {},
-    });
-  },
-
-  startCampaignStage: (stageId) => {
-    const nextStage = stageId ?? get().currentStage;
-    set({
-      gameMode: "COMMAND_ROOM",
-      gameState: "PLAYING",
-      currentStage: nextStage,
-      campaignState: "BRIEFING",
-      turnIndex: 0,
-      turnTimeLeft: CAMPAIGN_PACING.turnPlanningDuration,
-      commandPoints: CAMPAIGN_PACING.initialCommandPoints,
-      selectedDirectiveId: null,
-      selectedRegionId: null,
-      activeEventId: null,
-      campaignMetrics: createInitialCampaignMetrics(),
-      campaignQuiz: createInitialCampaignQuiz(),
-      currentQuestion: null,
-      turnLog: [],
-      directiveCooldowns: {},
-    });
-  },
-
-  startCampaignTurn: () => {
-    const { campaignState, directiveCooldowns } = get();
-    if (campaignState !== "BRIEFING" && campaignState !== "STAGE_REPORT") return;
-    set({
-      campaignState: "TURN_PLANNING",
-      turnTimeLeft: CAMPAIGN_PACING.turnPlanningDuration,
-      selectedDirectiveId: null,
-      selectedRegionId: null,
-      activeEventId: null,
-      currentQuestion: null,
-      directiveCooldowns: tickCooldowns(directiveCooldowns),
-    });
-  },
-
-  setTurnTimeLeft: (seconds) =>
-    set(() => ({
-      turnTimeLeft: Math.max(0, Math.floor(seconds)),
-    })),
-
-  tickTurnTimer: () =>
-    set((state) => ({
-      turnTimeLeft: Math.max(0, state.turnTimeLeft - 1),
-    })),
-
-  selectDirective: (directiveId) => set({ selectedDirectiveId: directiveId }),
-  selectRegion: (regionId) => set({ selectedRegionId: regionId }),
-  setActiveEvent: (eventId) => set({ activeEventId: eventId }),
-
-  commitTurnCommand: () => {
-    const { campaignState, selectedDirectiveId, selectedRegionId, commandPoints, directiveCooldowns } = get();
-    if (campaignState !== "TURN_PLANNING") return { success: false, reason: "INVALID_STATE" };
-    if (!selectedDirectiveId) return { success: false, reason: "NO_DIRECTIVE" };
-    if (!selectedRegionId) return { success: false, reason: "NO_REGION" };
-
-    const directive = getDirectiveById(selectedDirectiveId);
-    if (!directive) return { success: false, reason: "INVALID_DIRECTIVE" };
-    if (commandPoints < directive.costs.commandPoints) return { success: false, reason: "NO_COMMAND_POINTS" };
-
-    // Check cooldown
-    if ((directiveCooldowns[selectedDirectiveId] ?? 0) > 0) {
-      return { success: false, reason: "ON_COOLDOWN" };
-    }
-
-    // Apply cooldown
-    const nextCooldowns = { ...directiveCooldowns };
-    if (directive.cooldownTurns > 0) {
-      nextCooldowns[selectedDirectiveId] = directive.cooldownTurns;
-    }
-
-    set({
-      campaignState: "TURN_RESOLVE",
-      commandPoints: commandPoints - directive.costs.commandPoints,
-      directiveCooldowns: nextCooldowns,
-    });
-    return { success: true };
-  },
-
-  resolveTurnOutcome: () => {
-    const {
-      campaignState,
-      selectedDirectiveId,
-      selectedRegionId,
-      campaignMetrics,
-      turnIndex,
-      maxTurnsPerStage,
-      currentStage,
-      campaignQuiz,
-      turnLog,
-    } = get();
-    if (campaignState !== "TURN_RESOLVE") return;
-
-    const metricsBefore = { ...campaignMetrics };
-
-    // 1. Directive effects
-    const directive = getDirectiveById(selectedDirectiveId ?? "");
-    const directiveDelta: Partial<CampaignMetrics> = directive?.effects ?? {};
-
-    // 2. Region bonus effects
-    const region = getRegionById(selectedRegionId ?? "");
-    const regionDelta: Partial<CampaignMetrics> = region?.bonusEffects ?? {};
-
-    // 3. Random turn event
-    const event = rollTurnEvent(currentStage);
-    const eventDelta: Partial<CampaignMetrics> = event?.effects ?? {};
-
-    // 4. Merge all deltas
-    const mergedDelta: Partial<CampaignMetrics> = {
-      control: (directiveDelta.control ?? 0) + (regionDelta.control ?? 0) + (eventDelta.control ?? 0),
-      support: (directiveDelta.support ?? 0) + (regionDelta.support ?? 0) + (eventDelta.support ?? 0),
-      logistics: (directiveDelta.logistics ?? 0) + (regionDelta.logistics ?? 0) + (eventDelta.logistics ?? 0),
-      secrecy: (directiveDelta.secrecy ?? 0) + (regionDelta.secrecy ?? 0) + (eventDelta.secrecy ?? 0),
-      pressure: (directiveDelta.pressure ?? 0) + (regionDelta.pressure ?? 0) + (eventDelta.pressure ?? 0),
-    };
-
-    const nextMetrics = applyCampaignDelta(campaignMetrics, mergedDelta);
-    const nextTurnIndex = turnIndex + 1;
-    // Check if the current turn we just ended (turnIndex) was a checkpoint turn
-    // (turnIndex here is 1-based conceptually, so turnIndex 2 means we just finished turn 2)
-    const shouldQuiz = CAMPAIGN_PACING.quizCheckpointTurns.includes(turnIndex);
-
-    // 5. Log this turn
-    const logEntry: TurnLogEntry = {
-      turnIndex: nextTurnIndex,
-      directiveId: selectedDirectiveId,
-      regionId: selectedRegionId,
-      eventId: event?.id ?? null,
-      eventLabel: event?.label ?? null,
-      metricsBefore,
-      metricsAfter: nextMetrics,
-      quizResult: null,
-    };
-
-    if (isCampaignFailed(nextMetrics)) {
-      set({
-        campaignMetrics: nextMetrics,
-        turnIndex: nextTurnIndex,
-        campaignState: "GAME_OVER",
-        gameState: "GAME_OVER",
-        activeEventId: event?.id ?? null,
-        turnLog: [...turnLog, logEntry],
-      });
-      return;
-    }
-
-    if (shouldQuiz) {
-      const nextQuestion = pickQuestion(currentStage, campaignQuiz.askedIds);
-      set({
-        campaignMetrics: nextMetrics,
-        turnIndex: nextTurnIndex,
-        campaignState: nextQuestion ? "INTEL_QUIZ" : "STAGE_REPORT",
-        gameState: nextQuestion ? "QUIZ" : "PLAYING",
-        currentQuestion: nextQuestion,
-        activeEventId: event?.id ?? null,
-        turnLog: [...turnLog, logEntry],
-        campaignQuiz: nextQuestion
-          ? { ...campaignQuiz, currentQuestionId: nextQuestion.id }
-          : campaignQuiz,
-      });
-      return;
-    }
-
-    set({
-      campaignMetrics: nextMetrics,
-      turnIndex: nextTurnIndex,
-      campaignState: "STAGE_REPORT",
-      gameState: "PLAYING",
-      currentQuestion: null,
-      activeEventId: event?.id ?? null,
-      turnLog: [...turnLog, logEntry],
-    });
-  },
-
-  enterQuizCheckpoint: () => {
-    const { currentStage, campaignQuiz } = get();
-    const nextQuestion = getQuestionForStage(currentStage, campaignQuiz.askedIds);
-    if (!nextQuestion) {
-      set({ campaignState: "STAGE_REPORT" });
-      return;
-    }
-    set({
-      campaignState: "INTEL_QUIZ",
-      gameState: "QUIZ",
-      currentQuestion: nextQuestion as any,
-      campaignQuiz: { ...campaignQuiz, currentQuestionId: nextQuestion.id },
-    });
-  },
-
-  submitCampaignQuizAnswer: (answerIndex) => {
-    const { currentQuestion, campaignQuiz, campaignMetrics, turnLog } = get();
-    if (!currentQuestion) return { correct: false };
-
-    const isCorrect = answerIndex === currentQuestion.correctIndex;
-    const nextQuiz: CampaignQuizProgress = {
-      askedIds: campaignQuiz.askedIds.includes(currentQuestion.id)
-        ? campaignQuiz.askedIds
-        : [...campaignQuiz.askedIds, currentQuestion.id],
-      correct: campaignQuiz.correct + (isCorrect ? 1 : 0),
-      wrong: campaignQuiz.wrong + (isCorrect ? 0 : 1),
-      currentQuestionId: null,
-    };
-
-    const quizDelta: Partial<CampaignMetrics> = isCorrect
-      ? (QUIZ_IMPACT.correct as Partial<CampaignMetrics>)
-      : (QUIZ_IMPACT.wrong as Partial<CampaignMetrics>);
-
-    const nextMetrics = applyCampaignDelta(campaignMetrics, quizDelta);
-    const nextCommandPoints = Math.max(
-      0,
-      get().commandPoints + (isCorrect ? CAMPAIGN_PACING.quizCorrectCommandBonus : 0)
-    );
-
-    // Update last turn log entry with quiz result
-    const updatedLog = [...turnLog];
-    if (updatedLog.length > 0) {
-      updatedLog[updatedLog.length - 1] = {
-        ...updatedLog[updatedLog.length - 1],
-        quizResult: { correct: isCorrect, questionId: currentQuestion.id },
-        metricsAfter: nextMetrics,
-      };
-    }
-
-    // DO NOT transition campaignState here, so the user can see the feedback in IntelConsole!
-    set({
-      campaignMetrics: nextMetrics,
-      commandPoints: nextCommandPoints,
-      campaignQuiz: nextQuiz,
-      turnLog: updatedLog,
-    });
-
-    return { correct: isCorrect, explanation: currentQuestion.explanation };
-  },
-
-  finishCampaignQuiz: () => {
-    const { campaignMetrics } = get();
-    if (isCampaignFailed(campaignMetrics)) {
-      set({
-        campaignState: "GAME_OVER",
-        gameState: "GAME_OVER",
-        currentQuestion: null,
-      });
-      return;
-    }
-
-    set({
-      campaignState: "STAGE_REPORT",
-      gameState: "PLAYING",
-      currentQuestion: null,
-    });
-  },
-
-  advanceCampaignFlow: () => {
-    const { campaignState, turnIndex, maxTurnsPerStage, currentStage, campaignMetrics } = get();
-
-    if (campaignState === "BRIEFING" || campaignState === "STAGE_REPORT") {
-      if (turnIndex >= maxTurnsPerStage) {
-        const stagePassed = isCampaignStageTargetMet(currentStage, campaignMetrics);
-        if (!stagePassed) {
-          set({ campaignState: "GAME_OVER", gameState: "GAME_OVER" });
-          return;
-        }
-
-        const stageIndex = STAGE_SEQUENCE.indexOf(currentStage as any);
-        if (stageIndex < 0 || stageIndex >= STAGE_SEQUENCE.length - 1) {
-          set({ campaignState: "CAMPAIGN_CLEAR", gameState: "WON", currentStage: STAGES.COMPLETED });
-          return;
-        }
-
-        const nextStage = STAGE_SEQUENCE[stageIndex + 1];
-        get().startCampaignStage(nextStage);
-        return;
-      }
-
-      get().startCampaignTurn();
-    }
-  },
 
   setGamePhase: (phase) => set({ gamePhase: phase }),
 
@@ -673,7 +212,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   startGame: () => {
     set({
-      gameMode: "COMMAND_ROOM",
       gameState: "PLAYING",
       score: 0,
       currentStage: STAGES.STAGE_1_1954_1960,
@@ -692,17 +230,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       exposure: 8,
       gamePhase: "BUILD",
       houseHealth: 70,
-      campaignState: "BRIEFING",
-      turnIndex: 0,
-      turnTimeLeft: CAMPAIGN_PACING.turnPlanningDuration,
-      commandPoints: CAMPAIGN_PACING.initialCommandPoints,
-      selectedDirectiveId: null,
-      selectedRegionId: null,
-      activeEventId: null,
-      campaignMetrics: createInitialCampaignMetrics(),
-      campaignQuiz: createInitialCampaignQuiz(),
-      turnLog: [],
-      directiveCooldowns: {},
     });
   },
 

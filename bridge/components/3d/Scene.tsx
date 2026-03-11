@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Group, Vector3 } from "three";
+import { Vector3 } from "three";
 import HouseZone from "./HouseZone";
 import KnowledgeBlock from "./KnowledgeBlock";
 import { useGameStore } from "../../store/gameStore";
@@ -8,15 +8,13 @@ import { BLOCKS, SLOTS } from "../../data/gameData";
 import HandModel from "./HandModel";
 
 const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
-  const groupRef = useRef<Group>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const { currentStage, placedBlocks, placeBlock } = useGameStore();
 
   const [availableBlocks, setAvailableBlocks] = useState<any[]>([]);
   const [grabbedBlockId, setGrabbedBlockId] = useState<string | null>(null);
-  const rightHandPosRef = useRef(new Vector3(0, 0, 0));
-  const leftHandPosRef = useRef(new Vector3(0, 0, 0));
-  const rightHandTargetRef = useRef(new Vector3(0, 0, 0));
-  const leftHandTargetRef = useRef(new Vector3(0, 0, 0));
+  const [rightHandPos, setRightHandPos] = useState(new Vector3(0, 0, 0));
+  const [leftHandPos, setLeftHandPos] = useState(new Vector3(0, 0, 0));
 
   useEffect(() => {
     const placedIds = (placedBlocks[currentStage] ?? []).map((b) => b.id);
@@ -34,16 +32,14 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
 
   useFrame(({ viewport }) => {
     if (rightHand?.[8]) {
-      const x = rightHand[8].x * viewport.width - viewport.width / 2;
+      const x = (1 - rightHand[8].x) * viewport.width - viewport.width / 2;
       const y = (1 - rightHand[8].y) * viewport.height - viewport.height / 2;
-      rightHandTargetRef.current.set(x, y, 0);
-      rightHandPosRef.current.lerp(rightHandTargetRef.current, 0.34);
+      setRightHandPos(new Vector3(x, y, 0));
     }
     if (leftHand?.[8]) {
-      const x = leftHand[8].x * viewport.width - viewport.width / 2;
+      const x = (1 - leftHand[8].x) * viewport.width - viewport.width / 2;
       const y = (1 - leftHand[8].y) * viewport.height - viewport.height / 2;
-      leftHandTargetRef.current.set(x, y, 0);
-      leftHandPosRef.current.lerp(leftHandTargetRef.current, 0.34);
+      setLeftHandPos(new Vector3(x, y, 0));
     }
   });
 
@@ -83,8 +79,8 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
         <KnowledgeBlock
           key={block.id}
           data={block}
-          handPos={rightHandPosRef.current}
-          leftHandPos={leftHandPosRef.current}
+          handPos={rightHandPos}
+          leftHandPos={leftHandPos}
           gestureRight={gestureRight}
           gestureLeft={gestureLeft}
           grabbedBlockId={grabbedBlockId}
