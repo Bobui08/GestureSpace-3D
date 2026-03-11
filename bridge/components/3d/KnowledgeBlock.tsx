@@ -53,6 +53,7 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
   const meshRef = useRef<THREE.Group>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isGrabbed, setIsGrabbed] = useState(false);
+  const [grabbedBy, setGrabbedBy] = useState<"LEFT" | "RIGHT" | "DUAL" | null>(null);
   const [isShaking, setIsShaking] = useState(false);
   const [balanceWarning, setBalanceWarning] = useState(false);
   const [position] = useState(new Vector3(...data.position));
@@ -119,15 +120,25 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
       if (isHeavy) {
         if (dualClose && gestureRight === "PINCH" && gestureLeft === "PINCH") {
           setIsGrabbed(true);
+          setGrabbedBy("DUAL");
           setGrabbedBlockId(data.id);
           gsap.killTweensOf(meshRef.current.scale);
           gsap.killTweensOf(meshRef.current.position);
         }
-      } else if (rightDist < 1.45 && gestureRight === "PINCH") {
-        setIsGrabbed(true);
-        setGrabbedBlockId(data.id);
-        gsap.killTweensOf(meshRef.current.scale);
-        gsap.killTweensOf(meshRef.current.position);
+      } else {
+        const rightPinch = rightDist < 1.45 && gestureRight === "PINCH";
+        const leftPinch = leftDist < 1.45 && gestureLeft === "PINCH";
+
+        if (rightPinch || leftPinch) {
+          const chosenHand: "LEFT" | "RIGHT" =
+            rightPinch && leftPinch ? (rightDist <= leftDist ? "RIGHT" : "LEFT") : rightPinch ? "RIGHT" : "LEFT";
+
+          setIsGrabbed(true);
+          setGrabbedBy(chosenHand);
+          setGrabbedBlockId(data.id);
+          gsap.killTweensOf(meshRef.current.scale);
+          gsap.killTweensOf(meshRef.current.position);
+        }
       }
     }
 
@@ -145,9 +156,9 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
           setBalanceWarning(Math.abs(handPos.y - leftHandPos.y) > 2);
         }
       } else {
-        stillGrabbing = gestureRight === "PINCH";
+        stillGrabbing = grabbedBy === "LEFT" ? gestureLeft === "PINCH" : gestureRight === "PINCH";
         if (stillGrabbing) {
-          position.lerp(handPos, 0.2);
+          position.lerp(grabbedBy === "LEFT" ? leftHandPos : handPos, 0.24);
         }
       }
 
@@ -155,6 +166,7 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
         meshRef.current.position.copy(position);
       } else {
         setIsGrabbed(false);
+        setGrabbedBy(null);
         setBalanceWarning(false);
         const result = onDrop(data.id, position);
 

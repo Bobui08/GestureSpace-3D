@@ -14,6 +14,7 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     score,
     currentStage,
     gameState,
+    gameMode,
     startGame,
     gamePhase,
     defenseTimeLeft,
@@ -26,6 +27,9 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     streakCount,
     multiplier,
   } = useGameStore();
+
+  // Command Room mode has its own UI (CommandRoomRoot)
+  if (gameMode === "COMMAND_ROOM") return null;
 
   const [elapsed, setElapsed] = useState(0);
 

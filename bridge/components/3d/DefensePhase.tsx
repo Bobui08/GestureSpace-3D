@@ -123,17 +123,19 @@ const DefensePhase = ({ leftHand, rightHand }) => {
     const [effects, setEffects] = useState<{ id: number, pos: THREE.Vector3, color: string }[]>([]);
     const [damageTrigger, setDamageTrigger] = useState(0); // Trigger for flash
     const lastSpawnTime = useRef(0);
+    const leftPosRef = useRef<THREE.Vector3 | null>(null);
+    const rightPosRef = useRef<THREE.Vector3 | null>(null);
 
     // Convert hand landmarks to 3D
     const calculateWorldPos = (hand) => {
         if (!hand || !hand[8]) return null;
-        const x = (0.5 - hand[8].x) * 16;
+        const x = (hand[8].x - 0.5) * 16;
         const y = (0.5 - hand[8].y) * 10;
         return new THREE.Vector3(x, y + 2, 5);
     };
 
-    const leftPos = useMemo(() => calculateWorldPos(leftHand), [leftHand]);
-    const rightPos = useMemo(() => calculateWorldPos(rightHand), [rightHand]);
+    const leftTarget = useMemo(() => calculateWorldPos(leftHand), [leftHand]);
+    const rightTarget = useMemo(() => calculateWorldPos(rightHand), [rightHand]);
 
     const addEffect = (pos, color) => {
         setEffects(prev => [...prev, { id: Date.now() + Math.random(), pos: pos.clone(), color }]);
@@ -141,6 +143,20 @@ const DefensePhase = ({ leftHand, rightHand }) => {
 
     useFrame((state) => {
         if (gamePhase !== 'DEFEND') return;
+
+        if (leftTarget) {
+            if (!leftPosRef.current) leftPosRef.current = leftTarget.clone();
+            leftPosRef.current.lerp(leftTarget, 0.34);
+        } else {
+            leftPosRef.current = null;
+        }
+
+        if (rightTarget) {
+            if (!rightPosRef.current) rightPosRef.current = rightTarget.clone();
+            rightPosRef.current.lerp(rightTarget, 0.34);
+        } else {
+            rightPosRef.current = null;
+        }
 
         const time = state.clock.getElapsedTime();
         if (time - lastSpawnTime.current > 1.2) {
@@ -192,14 +208,14 @@ const DefensePhase = ({ leftHand, rightHand }) => {
     return (
         <group>
             {/* Hand Visualizers (Shields) */}
-            {leftPos && (
-                <mesh position={leftPos}>
+            {leftPosRef.current && (
+                <mesh position={leftPosRef.current}>
                     <ringGeometry args={[0.2, 0.6, 32]} />
                     <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
                 </mesh>
             )}
-            {rightPos && (
-                <mesh position={rightPos}>
+            {rightPosRef.current && (
+                <mesh position={rightPosRef.current}>
                     <ringGeometry args={[0.2, 0.6, 32]} />
                     <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
                 </mesh>
@@ -210,8 +226,8 @@ const DefensePhase = ({ leftHand, rightHand }) => {
                     key={p.id}
                     {...p}
                     onHitHouse={(pos) => handleHitHouse(p.id, p.type, pos)}
-                    leftHandPos={leftPos}
-                    rightHandPos={rightPos}
+                    leftHandPos={leftPosRef.current}
+                    rightHandPos={rightPosRef.current}
                     onHitHand={(pos) => handleHitHand(p.id, p.type, pos)}
                 />
             ))}

@@ -12,14 +12,40 @@ import IntroEffect from './3d/IntroEffect';
 import PreIntroEffect from './3d/PreIntroEffect';
 import DefensePhase from './3d/DefensePhase';
 import SocialEnvironment from './3d/SocialEnvironment';
+import CommandRoomRoot from './command-room/CommandRoomRoot';
+import { useGestureIntent } from '../hooks/useGestureIntent';
+import GestureCursor from './ui/GestureCursor';
 
 const Game = () => {
     const { videoRef, leftHand, rightHand, gestureLeft, gestureRight } = useHandTracking();
-    const { gameState, gamePhase, updateStageTime } = useGameStore();
+    const { gameState, gamePhase, gameMode, updateStageTime, campaignState } = useGameStore();
 
-    // Update timer every second when playing
-    // Update timer every second when playing
+    // P4: Initialize Gesture Intent Layer
+    useGestureIntent(rightHand, gestureRight);
+
+    // Timer — branches by game mode
     useEffect(() => {
+        if (gameMode === 'COMMAND_ROOM') {
+            // Campaign turn timer: tick every second during TURN_PLANNING
+            const state = useGameStore.getState();
+            if (state.campaignState !== 'TURN_PLANNING') return;
+
+            const interval = setInterval(() => {
+                const s = useGameStore.getState();
+                if (s.campaignState !== 'TURN_PLANNING') {
+                    clearInterval(interval);
+                    return;
+                }
+                s.tickTurnTimer();
+                if (s.turnTimeLeft <= 1) {
+                    // Auto-commit if time runs out (or transition to report)
+                    clearInterval(interval);
+                }
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+
+        // LEGACY mode timer
         if (gameState === 'PLAYING') {
             const interval = setInterval(() => {
                 const state = useGameStore.getState();
@@ -36,8 +62,43 @@ const Game = () => {
             }, 1000);
             return () => clearInterval(interval);
         }
-    }, [gameState, updateStageTime]);
+    }, [gameState, gameMode, campaignState, updateStageTime]);
 
+    // ========================
+    // COMMAND_ROOM MODE
+    // ========================
+    if (gameMode === 'COMMAND_ROOM') {
+        return (
+            <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+                {/* Webcam feed (small, bottom-left) */}
+                <video
+                    ref={videoRef}
+                    style={{
+                        position: 'absolute',
+                        width: '140px',
+                        height: '105px',
+                        bottom: '16px',
+                        left: '16px',
+                        borderRadius: '8px',
+                        zIndex: 300,
+                        transform: 'scaleX(-1)',
+                        opacity: 0.7,
+                        border: '1px solid rgba(0, 243, 255, 0.2)',
+                    }}
+                />
+
+                {/* Command Room UI (full-screen HTML overlay) */}
+                <CommandRoomRoot />
+                
+                {/* P4: Virtual Cursor for interactions */}
+                <GestureCursor />
+            </div>
+        );
+    }
+
+    // ========================
+    // LEGACY MODE (unchanged)
+    // ========================
     return (
         <div style={{ width: '100vw', height: '100vh', background: '#87CEEB', position: 'relative', overflow: 'hidden' }}>
             {/* Video Feed */}
@@ -81,11 +142,11 @@ const Game = () => {
                             <SocialEnvironment />
 
                             {/* Camera Controls - Mouse only, no hand control */}
-                            <OrbitControls 
-                                makeDefault 
-                                enableZoom={true} 
-                                enablePan={true} 
-                                enableRotate={true} 
+                            <OrbitControls
+                                makeDefault
+                                enableZoom={true}
+                                enablePan={true}
+                                enableRotate={true}
                             />
 
                             {/* Render Game Scene (Building) */}

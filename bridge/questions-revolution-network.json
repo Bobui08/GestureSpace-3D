@@ -230,27 +230,27 @@
         },
         {
           "id": "S2Q9",
-          "question": "Trong game, cụm mạng 'tam giác bền vững' tượng trưng cho bài học lịch sử nào?",
+          "question": "Cơ quan lãnh đạo trực tiếp cách mạng miền Nam được củng cố đầu thập niên 1960 là cơ quan nào?",
           "options": [
-            "Chỉ dựa vào một lực lượng đơn lẻ",
-            "Kết hợp lực lượng chính trị, vũ trang và hậu cần",
-            "Tách rời Bắc và Nam",
-            "Phụ thuộc hoàn toàn vào bên ngoài"
+            "Trung ương Cục miền Nam",
+            "Quốc hội khóa I",
+            "Hội Liên hiệp quốc dân Việt Nam",
+            "Mặt trận Tổ quốc Việt Nam"
           ],
-          "correctIndex": 1,
-          "explanation": "Bài học cốt lõi là phối hợp đồng bộ các mặt trận."
+          "correctIndex": 0,
+          "explanation": "Trung ương Cục miền Nam giữ vai trò chỉ đạo trực tiếp phong trào cách mạng ở miền Nam."
         },
         {
           "id": "S2Q10",
-          "question": "Yếu tố then chốt giúp mạng lưới cách mạng tồn tại trong truy quét mạnh là gì?",
+          "question": "Ý nghĩa nổi bật của chiến thắng Ấp Bắc (1963) đối với phong trào chống 'Chiến tranh đặc biệt' là gì?",
           "options": [
-            "Tăng Exposure để mở rộng nhanh",
-            "Bám dân, phân tán hợp lý, giữ liên lạc chỉ huy",
-            "Đóng toàn bộ tuyến vận chuyển",
-            "Loại bỏ vùng an toàn"
+            "Khẳng định quân giải phóng có thể đánh bại chiến thuật trực thăng vận, thiết xa vận",
+            "Buộc Mỹ rút toàn bộ cố vấn quân sự ngay lập tức",
+            "Chấm dứt hoàn toàn chiến tranh ở miền Nam",
+            "Làm tan rã ngay toàn bộ chính quyền Sài Gòn"
           ],
-          "correctIndex": 1,
-          "explanation": "Bám dân và giữ liên kết chỉ huy là điều kiện sống còn."
+          "correctIndex": 0,
+          "explanation": "Ấp Bắc là thắng lợi quân sự có ý nghĩa cổ vũ lớn, chứng tỏ khả năng đánh bại chiến thuật hiện đại của đối phương."
         }
       ]
     },
@@ -344,15 +344,15 @@
         },
         {
           "id": "S3Q8",
-          "question": "Nếu trả lời sai liên tiếp trong stage 3, game phạt tăng chỉ số nào nhiều nhất để mô phỏng nguy cơ thực tế?",
+          "question": "Phong trào tiêu biểu của phụ nữ miền Bắc trong kháng chiến chống Mỹ giai đoạn này là gì?",
           "options": [
-            "Influence",
-            "Exposure",
-            "KnowledgeScore",
-            "ComboScore"
+            "Ba đảm đang",
+            "Ba sẵn sàng",
+            "Năm xung phong",
+            "Gió Đại Phong"
           ],
-          "correctIndex": 1,
-          "explanation": "Exposure tăng phản ánh nguy cơ lộ mạng lưới và bị đánh phá."
+          "correctIndex": 0,
+          "explanation": "Phong trào Ba đảm đang là phong trào tiêu biểu của phụ nữ miền Bắc trong thời kỳ chống Mỹ."
         },
         {
           "id": "S3Q9",
@@ -368,15 +368,15 @@
         },
         {
           "id": "S3Q10",
-          "question": "Điều kiện qua màn cuối trong game nhấn mạnh bài học lịch sử nào?",
+          "question": "Chiến thắng quân sự tiêu biểu cuối năm 1965 chứng tỏ ta có thể đánh bại quân Mỹ trong 'Chiến tranh cục bộ' là chiến thắng nào?",
           "options": [
-            "Chỉ cần quân sự, không cần chính trị",
-            "Phải kết hợp xây dựng hậu phương, chi viện tiền tuyến và lãnh đạo thống nhất",
-            "Chỉ cần trả lời đúng câu hỏi",
-            "Chỉ cần tăng tốc độ thao tác tay"
+            "Ấp Bắc",
+            "Vạn Tường",
+            "Điện Biên Phủ",
+            "Đường 9 - Khe Sanh"
           ],
           "correctIndex": 1,
-          "explanation": "Bài học trung tâm là kết hợp toàn diện các mặt trận dưới sự lãnh đạo thống nhất."
+          "explanation": "Vạn Tường (1965) là thắng lợi mở đầu có ý nghĩa lớn trong việc đánh bại quân Mỹ trực tiếp tham chiến."
         }
       ]
     }

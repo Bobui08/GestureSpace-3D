@@ -1,100 +1,137 @@
-import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Vector3, CylinderGeometry, MeshStandardMaterial } from 'three';
+import React, { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Mesh, Vector3 } from "three";
 
-const CONNECTIONS = [
-    [0, 1], [1, 2], [2, 3], [3, 4], // Thumb
-    [0, 5], [5, 6], [6, 7], [7, 8], // Index
-    [0, 9], [9, 10], [10, 11], [11, 12], // Middle
-    [0, 13], [13, 14], [14, 15], [15, 16], // Ring
-    [0, 17], [17, 18], [18, 19], [19, 20], // Pinky
-    [5, 9], [9, 13], [13, 17] // Palm
+interface Landmark {
+  x: number;
+  y: number;
+  z?: number;
+}
+
+interface HandModelProps {
+  landmarks: Landmark[] | null;
+  isRight: boolean;
+}
+
+const CONNECTIONS: [number, number][] = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [0, 5],
+  [5, 6],
+  [6, 7],
+  [7, 8],
+  [0, 9],
+  [9, 10],
+  [10, 11],
+  [11, 12],
+  [0, 13],
+  [13, 14],
+  [14, 15],
+  [15, 16],
+  [0, 17],
+  [17, 18],
+  [18, 19],
+  [19, 20],
+  [5, 9],
+  [9, 13],
+  [13, 17],
 ];
 
-const HandModel = ({ landmarks, isRight }) => {
-    const jointsRef = useRef([]);
-    const bonesRef = useRef([]);
+const HAND_JOINT_COUNT = 21;
 
-    // Helper: Project 2D normalized landmarks to 3D Plane (similar to Scene.js logic)
-    const project3D = (landmark, viewport) => {
-        // 0,0 is center of screen in Three.js
-        // Hand tracking: x: 0-1, y: 0-1
-        if (!landmark) return new Vector3(0, 0, 0);
+const HandModel: React.FC<HandModelProps> = ({ landmarks, isRight }) => {
+  const jointsRef = useRef<(Mesh | null)[]>([]);
+  const bonesRef = useRef<(Mesh | null)[]>([]);
+  const smoothPointsRef = useRef<Vector3[]>(
+    Array.from({ length: HAND_JOINT_COUNT }, () => new Vector3())
+  );
+  const targetPointsRef = useRef<Vector3[]>(
+    Array.from({ length: HAND_JOINT_COUNT }, () => new Vector3())
+  );
+  const tempMidRef = useRef(new Vector3());
 
-        // Scale factor to make it visible in expected scene scale
-        // Screen width approx 16-20 units at z=0 with current camera
-        // Let's use viewport width/height
-        const x = (1 - landmark.x) * viewport.width - viewport.width / 2;
-        const y = (1 - landmark.y) * viewport.height - viewport.height / 2;
-        // Z is tricky. MediaPipe gives 'z' roughly relative to wrist, but scaled.
-        // We can use a fixed Z plane, or try to use the raw Z if available.
-        // For "Hand Visualization", depth matters. 
-        // landmarks[i].z is relative to the image plane, with the same scale as x.
-        const z = -landmark.z * (viewport.width); // Scale z roughly to match x scale?
+  const project3D = (landmark: Landmark, viewport: { width: number; height: number }) => {
+    const x = landmark.x * viewport.width - viewport.width / 2;
+    const y = (1 - landmark.y) * viewport.height - viewport.height / 2;
+    const z = -(landmark.z ?? 0) * viewport.width;
+    return { x, y, z };
+  };
 
-        return new Vector3(x, y, z || 0);
-    };
+  useFrame(({ viewport }, delta) => {
+    if (!landmarks) return;
 
-    useFrame(({ viewport }) => {
-        if (!landmarks) return;
+    const blend = Math.min(0.6, Math.max(0.22, delta * 10));
 
-        // Update Joints
-        landmarks.forEach((lm, i) => {
-            if (jointsRef.current[i]) {
-                const pos = project3D(lm, viewport);
-                jointsRef.current[i].position.copy(pos);
-            }
-        });
+    for (let i = 0; i < HAND_JOINT_COUNT; i += 1) {
+      const lm = landmarks[i];
+      const target = targetPointsRef.current[i];
+      const smooth = smoothPointsRef.current[i];
+      const jointMesh = jointsRef.current[i];
 
-        // Update Bones
-        CONNECTIONS.forEach((pair, i) => {
-            if (bonesRef.current[i] && jointsRef.current[pair[0]] && jointsRef.current[pair[1]]) {
-                const start = jointsRef.current[pair[0]].position;
-                const end = jointsRef.current[pair[1]].position;
+      if (!lm) continue;
 
-                // Position is midpoint
-                bonesRef.current[i].position.copy(start).lerp(end, 0.5);
+      const projected = project3D(lm, viewport);
+      target.set(projected.x, projected.y, projected.z);
+      smooth.lerp(target, blend);
 
-                // Orientation
-                bonesRef.current[i].lookAt(end);
-                bonesRef.current[i].rotateX(Math.PI / 2); // Align cylinder Y with direction
+      if (jointMesh) {
+        jointMesh.position.copy(smooth);
+      }
+    }
 
-                // Length
-                const dist = start.distanceTo(end);
-                bonesRef.current[i].scale.set(1, dist, 1);
-            }
-        });
-    });
+    for (let i = 0; i < CONNECTIONS.length; i += 1) {
+      const [startIdx, endIdx] = CONNECTIONS[i];
+      const bone = bonesRef.current[i];
+      if (!bone) continue;
 
-    if (!landmarks) return null;
+      const start = smoothPointsRef.current[startIdx];
+      const end = smoothPointsRef.current[endIdx];
+      const midpoint = tempMidRef.current.copy(start).lerp(end, 0.5);
+      const length = start.distanceTo(end);
 
-    return (
-        <group>
-            {/* Joints */}
-            {Array.from({ length: 21 }).map((_, i) => (
-                <mesh
-                    key={`joint-${i}`}
-                    ref={el => jointsRef.current[i] = el}
-                    scale={[0.15, 0.15, 0.15]}
-                >
-                    <sphereGeometry args={[1, 16, 16]} />
-                    <meshStandardMaterial color={isRight ? "#4CAF50" : "#2196F3"} emissive={0.2} />
-                </mesh>
-            ))}
+      bone.position.copy(midpoint);
+      bone.lookAt(end);
+      bone.rotateX(Math.PI / 2);
+      bone.scale.set(1, Math.max(0.001, length), 1);
+    }
+  });
 
-            {/* Bones */}
-            {CONNECTIONS.map((_, i) => (
-                <mesh
-                    key={`bone-${i}`}
-                    ref={el => bonesRef.current[i] = el}
-                >
-                    {/* Unit cylinder, scaled later */}
-                    <cylinderGeometry args={[0.08, 0.08, 1, 8]} />
-                    <meshStandardMaterial color="white" transparent opacity={0.6} />
-                </mesh>
-            ))}
-        </group>
-    );
+  if (!landmarks) return null;
+
+  return (
+    <group>
+      {Array.from({ length: HAND_JOINT_COUNT }).map((_, idx) => (
+        <mesh
+          key={`joint-${idx}`}
+          ref={(el) => {
+            jointsRef.current[idx] = el;
+          }}
+          scale={[0.15, 0.15, 0.15]}
+        >
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshStandardMaterial
+            color={isRight ? "#4CAF50" : "#2196F3"}
+            emissive={isRight ? "#1B5E20" : "#0B3D91"}
+            emissiveIntensity={0.22}
+          />
+        </mesh>
+      ))}
+
+      {CONNECTIONS.map((_, idx) => (
+        <mesh
+          key={`bone-${idx}`}
+          ref={(el) => {
+            bonesRef.current[idx] = el;
+          }}
+        >
+          <cylinderGeometry args={[0.08, 0.08, 1, 8]} />
+          <meshStandardMaterial color="white" transparent opacity={0.6} />
+        </mesh>
+      ))}
+    </group>
+  );
 };
 
 export default HandModel;

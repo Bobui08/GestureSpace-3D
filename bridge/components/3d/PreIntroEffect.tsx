@@ -90,9 +90,9 @@ const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
       activeHand = rightHand[0] || activeHand;
     }
 
-    // Update visual cursor position (invert X for mirror effect)
+    // Update visual cursor position
     if (activeHand) {
-      setCursorPos({ x: (1 - activeHand.x) * 100, y: activeHand.y * 100 });
+      setCursorPos({ x: activeHand.x * 100, y: activeHand.y * 100 });
     } else {
       setCursorPos(null);
     }
