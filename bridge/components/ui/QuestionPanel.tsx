@@ -32,7 +32,7 @@ const QuestionPanel = () => {
     if (locked) return;
     setLocked(true);
     const result = answerQuiz(index);
-    const text = result.correct ? "Dung. " : "Chua dung. ";
+    const text = result.correct ? "Đúng. " : "Chưa đúng. ";
     setFeedback(`${text}${result.explanation ?? ""}`);
     setTimeout(() => setLocked(false), 300);
   };

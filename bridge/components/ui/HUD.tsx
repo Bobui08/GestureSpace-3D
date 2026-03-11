@@ -74,11 +74,11 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     <div style={styles.root}>
       <div style={styles.topRow}>
         <div style={styles.card}>
-          <span style={styles.label}>Diem so</span>
+          <span style={styles.label}>Điểm số</span>
           <span style={styles.value}>{score}</span>
         </div>
         <div style={styles.card}>
-          <span style={styles.label}>Thoi gian</span>
+          <span style={styles.label}>Thời gian</span>
           <span style={styles.value}>{formatTime(elapsed)}</span>
         </div>
         <div style={styles.stageCard}>
@@ -86,13 +86,13 @@ const HUD = ({ gestureLeft, gestureRight }) => {
             <img src={stageImage} alt={stageInfo.title} style={styles.stageImage} />
           </div>
           <div style={styles.stageTextWrap}>
-            <span style={styles.label}>Giai doan</span>
+            <span style={styles.label}>Giai đoạn</span>
             <span style={styles.stageName}>{stageInfo.shortTitle}</span>
             <span style={styles.stageSub}>
               {stageInfo.years} · {stageInfo.title}
             </span>
             <span style={styles.progressText}>
-              Tien do node: {stageProgress.placedCount}/{stageProgress.totalCount}
+              Tiến độ node: {stageProgress.placedCount}/{stageProgress.totalCount}
             </span>
           </div>
         </div>
@@ -107,14 +107,14 @@ const HUD = ({ gestureLeft, gestureRight }) => {
 
       {gamePhase === "DEFEND" && (
         <div style={styles.defenseBanner}>
-          <span style={styles.defenseTitle}>Can quet dang dien ra</span>
-          <span style={styles.defenseTime}>Con lai: {defenseTimeLeft}s</span>
+          <span style={styles.defenseTitle}>Càn quét đang diễn ra</span>
+          <span style={styles.defenseTime}>Còn lại: {defenseTimeLeft}s</span>
         </div>
       )}
 
       <div style={styles.bottomRow}>
-        <div style={styles.gestureItem}>Tay trai: {gestureLeft}</div>
-        <div style={styles.gestureItem}>Tay phai: {gestureRight}</div>
+        <div style={styles.gestureItem}>Tay trái: {gestureLeft}</div>
+        <div style={styles.gestureItem}>Tay phải: {gestureRight}</div>
         <div style={styles.gestureItem}>
           Streak: {streakCount} {multiplier > 1 ? `· x${multiplier}` : ""}
         </div>

@@ -108,7 +108,7 @@ const SocialEnvironment = () => {
           REVOLUTION NETWORK
         </Text>
         <Text position={[0, -0.85, 0]} fontSize={0.28} color="#bae6fd" anchorX="center">
-          Lan toa mang luoi cach mang 1954-1965
+          Lan tỏa mạng lưới cách mạng 1954-1965
         </Text>
       </Billboard>
     </group>
