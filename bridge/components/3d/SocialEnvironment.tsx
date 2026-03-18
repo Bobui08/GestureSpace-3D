@@ -13,7 +13,7 @@ const posterData = [
   {
     label: "1961-1963",
     title: "Phá Chiến tranh đặc biệt",
-    file: "Phong trào Đồng khởi miền Nam 1960.jpg",
+    file: "chien-tranh-dac-biet-la-gi-so-sanh-chien-tranh-dac-biet-va-cuc-bo-2-1688379195.jpg",
     position: [0, 3.4, -9] as [number, number, number],
   },
   {

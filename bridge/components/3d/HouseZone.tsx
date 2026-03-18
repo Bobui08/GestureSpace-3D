@@ -3,6 +3,15 @@ import { useMemo } from "react";
 import { useGameStore } from "../../store/gameStore";
 import { SLOTS, STAGE_LINKS, STAGE_META } from "../../data/gameData";
 
+const SLOT_COLORS = {
+  inactiveLine: "#7dd3fc",
+  activeLine: "#facc15",
+  inactiveCore: "#e0f2fe",
+  activeCore: "#fef3c7",
+  inactiveGlow: "#38bdf8",
+  activeGlow: "#f59e0b",
+};
+
 const HouseZone = () => {
   const { placedBlocks, currentStage } = useGameStore();
   const slots = SLOTS[currentStage] ?? [];
@@ -41,10 +50,10 @@ const HouseZone = () => {
           <Line
             key={`${currentStage}-link-${idx}`}
             points={[aPos, bPos]}
-            color={active ? "#22c55e" : "#334155"}
-            lineWidth={active ? 2.5 : 1}
+            color={active ? SLOT_COLORS.activeLine : SLOT_COLORS.inactiveLine}
+            lineWidth={active ? 3.6 : 2.2}
             transparent
-            opacity={active ? 0.9 : 0.45}
+            opacity={active ? 0.98 : 0.78}
           />
         );
       })}
@@ -55,16 +64,23 @@ const HouseZone = () => {
           <group key={slot.id} position={slot.pos}>
             <Sphere args={[0.35, 24, 24]}>
               <meshStandardMaterial
-                color={active ? "#86efac" : "#475569"}
-                emissive={active ? "#22c55e" : "#000000"}
-                emissiveIntensity={active ? 0.9 : 0}
+                color={active ? SLOT_COLORS.activeCore : SLOT_COLORS.inactiveCore}
+                emissive={active ? SLOT_COLORS.activeGlow : SLOT_COLORS.inactiveGlow}
+                emissiveIntensity={active ? 1.35 : 0.55}
               />
             </Sphere>
-            <Sphere args={[0.52, 20, 20]}>
+            <Sphere args={[0.18, 18, 18]}>
               <meshStandardMaterial
-                color={active ? "#22c55e" : "#64748b"}
+                color={active ? "#fff7ed" : "#f8fafc"}
+                emissive={active ? "#fde68a" : "#bae6fd"}
+                emissiveIntensity={active ? 1.8 : 1.1}
+              />
+            </Sphere>
+            <Sphere args={[0.56, 20, 20]}>
+              <meshStandardMaterial
+                color={active ? SLOT_COLORS.activeGlow : SLOT_COLORS.inactiveGlow}
                 transparent
-                opacity={active ? 0.14 : 0.06}
+                opacity={active ? 0.28 : 0.16}
               />
             </Sphere>
           </group>

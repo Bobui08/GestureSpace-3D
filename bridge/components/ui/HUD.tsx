@@ -2,6 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useGameStore } from "../../store/gameStore";
 import { BLOCKS, STAGE_META, STAGES, getImagePath } from "../../data/gameData";
 
+type HUDProps = {
+  gestureLeft: string;
+  gestureRight: string;
+};
+
 const meterStyle = (value: number, color: string): React.CSSProperties => ({
   width: `${Math.max(0, Math.min(100, value))}%`,
   height: "100%",
@@ -9,7 +14,7 @@ const meterStyle = (value: number, color: string): React.CSSProperties => ({
   transition: "width 0.25s ease",
 });
 
-const HUD = ({ gestureLeft, gestureRight }) => {
+const HUD = ({ gestureLeft, gestureRight }: HUDProps) => {
   const {
     score,
     currentStage,
@@ -31,11 +36,16 @@ const HUD = ({ gestureLeft, gestureRight }) => {
 
   useEffect(() => {
     if (!gameStartTime) return;
-    const interval = setInterval(() => setElapsed(Date.now() - gameStartTime), 1000);
+
+    const interval = setInterval(() => {
+      setElapsed(Date.now() - gameStartTime);
+    }, 1000);
+
     return () => clearInterval(interval);
   }, [gameStartTime]);
 
-  const stageInfo = STAGE_META[currentStage] ?? STAGE_META[STAGES.STAGE_1_1954_1960];
+  const stageInfo =
+    STAGE_META[currentStage] ?? STAGE_META[STAGES.STAGE_1_1954_1960];
   const stageImage = getImagePath(stageInfo.image);
 
   const stageProgress = useMemo(() => {
@@ -51,7 +61,8 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  if (gameState === "PRE_INTRO" || gameState === "INTRO" || gameState === "WON") return null;
+  if (gameState === "PRE_INTRO" || gameState === "INTRO" || gameState === "WON")
+    return null;
 
   if (gameState === "GAME_OVER") {
     return (
@@ -59,7 +70,8 @@ const HUD = ({ gestureLeft, gestureRight }) => {
         <div style={styles.gameOverCard}>
           <h1 style={styles.gameOverTitle}>Nhiệm vụ thất bại</h1>
           <p style={styles.gameOverText}>
-            Mạng lưới bị thủng hoặc mất ổn định. Hãy thử lại với chiến lược an toàn hơn.
+            Mạng lưới bị thủng hoặc mất ổn định. Hãy thử lại với chiến lược an
+            toàn hơn.
           </p>
           <p style={styles.gameOverScore}>Điểm: {score}</p>
           <button style={styles.retryButton} onClick={startGame}>
@@ -72,19 +84,53 @@ const HUD = ({ gestureLeft, gestureRight }) => {
 
   return (
     <div style={styles.root}>
-      <div style={styles.topRow}>
+      <div style={styles.rightColumn}>
+        {gamePhase === "DEFEND" && (
+          <div style={styles.defenseBanner}>
+            <span style={styles.defenseTitle}>Càn quét đang diễn ra</span>
+            <span style={styles.defenseTime}>Còn lại: {defenseTimeLeft}s</span>
+          </div>
+        )}
+
+        <div style={styles.metricGrid}>
+          <Metric label="Ảnh hưởng" value={influence} color="#24c97a" />
+          <Metric label="Ổn định" value={stability} color="#2e86ff" />
+          <Metric label="Hậu cần" value={logistics} color="#eab308" />
+          <Metric label="Lộ diện" value={exposure} color="#ef4444" inverse />
+        </div>
+
+        <div style={styles.statusPanel}>
+          <span style={styles.panelTitle}>Trạng thái thao tác</span>
+          <div style={styles.statusList}>
+            <div style={styles.gestureItem}>Tay trái: {gestureRight}</div>
+            <div style={styles.gestureItem}>Tay phải: {gestureLeft}</div>
+            <div style={styles.gestureItem}>
+              Streak: {streakCount} {multiplier > 1 ? `· x${multiplier}` : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={styles.bottomDock}>
         <div style={styles.card}>
           <span style={styles.label}>Điểm số</span>
           <span style={styles.value}>{score}</span>
         </div>
+
         <div style={styles.card}>
           <span style={styles.label}>Thời gian</span>
           <span style={styles.value}>{formatTime(elapsed)}</span>
         </div>
+
         <div style={styles.stageCard}>
           <div style={styles.stageImageWrap}>
-            <img src={stageImage} alt={stageInfo.title} style={styles.stageImage} />
+            <img
+              src={stageImage}
+              alt={stageInfo.title}
+              style={styles.stageImage}
+            />
           </div>
+
           <div style={styles.stageTextWrap}>
             <span style={styles.label}>Giai đoạn</span>
             <span style={styles.stageName}>{stageInfo.shortTitle}</span>
@@ -92,31 +138,10 @@ const HUD = ({ gestureLeft, gestureRight }) => {
               {stageInfo.years} · {stageInfo.title}
             </span>
             <span style={styles.progressText}>
-              Tiến độ node: {stageProgress.placedCount}/{stageProgress.totalCount}
+              Tiến độ node: {stageProgress.placedCount}/
+              {stageProgress.totalCount}
             </span>
           </div>
-        </div>
-      </div>
-
-      <div style={styles.metricGrid}>
-        <Metric label="Ảnh hưởng" value={influence} color="#24c97a" />
-        <Metric label="Ổn định" value={stability} color="#2e86ff" />
-        <Metric label="Hậu cần" value={logistics} color="#eab308" />
-        <Metric label="Lộ diện" value={exposure} color="#ef4444" inverse />
-      </div>
-
-      {gamePhase === "DEFEND" && (
-        <div style={styles.defenseBanner}>
-          <span style={styles.defenseTitle}>Càn quét đang diễn ra</span>
-          <span style={styles.defenseTime}>Còn lại: {defenseTimeLeft}s</span>
-        </div>
-      )}
-
-      <div style={styles.bottomRow}>
-        <div style={styles.gestureItem}>Tay trái: {gestureLeft}</div>
-        <div style={styles.gestureItem}>Tay phải: {gestureRight}</div>
-        <div style={styles.gestureItem}>
-          Streak: {streakCount} {multiplier > 1 ? `· x${multiplier}` : ""}
         </div>
       </div>
     </div>
@@ -151,16 +176,28 @@ const styles: Record<string, React.CSSProperties> = {
     inset: 0,
     pointerEvents: "none",
     zIndex: 120,
-    padding: 18,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
     color: "#f8fafc",
     fontFamily: "Segoe UI, Tahoma, sans-serif",
   },
-  topRow: {
+  rightColumn: {
+    position: "absolute",
+    top: 18,
+    right: 18,
+    bottom: 18,
+    width: "min(320px, calc(100vw - 36px))",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    alignItems: "stretch",
+  },
+  bottomDock: {
+    position: "absolute",
+    left: 18,
+    right: 356,
+    bottom: 18,
     display: "grid",
-    gridTemplateColumns: "220px 220px minmax(360px, 1fr)",
+    gridTemplateColumns:
+      "minmax(150px, 180px) minmax(150px, 180px) minmax(320px, 1fr)",
     gap: 12,
     alignItems: "stretch",
   },
@@ -172,6 +209,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
+    minWidth: 0,
   },
   label: {
     fontSize: 12,
@@ -190,13 +228,15 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 14,
     padding: 10,
     display: "grid",
-    gridTemplateColumns: "130px 1fr",
+    gridTemplateColumns: "110px minmax(0, 1fr)",
     gap: 12,
     alignItems: "stretch",
+    minWidth: 0,
   },
   stageImageWrap: {
     width: "100%",
     height: "100%",
+    minHeight: 88,
     borderRadius: 10,
     overflow: "hidden",
     border: "1px solid rgba(148, 163, 184, 0.4)",
@@ -211,6 +251,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     justifyContent: "center",
     gap: 2,
+    minWidth: 0,
   },
   stageName: {
     fontSize: 20,
@@ -230,11 +271,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#67e8f9",
   },
   metricGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, minmax(170px, 1fr))",
+    display: "flex",
+    flexDirection: "column",
     gap: 10,
-    alignSelf: "center",
-    width: "min(920px, 90vw)",
   },
   metricCard: {
     background: "rgba(2, 6, 23, 0.78)",
@@ -256,15 +295,35 @@ const styles: Record<string, React.CSSProperties> = {
     background: "rgba(51, 65, 85, 0.9)",
     overflow: "hidden",
   },
-  defenseBanner: {
-    alignSelf: "center",
+  statusPanel: {
+    background: "rgba(2, 6, 23, 0.78)",
+    border: "1px solid rgba(148, 163, 184, 0.3)",
+    borderRadius: 14,
+    padding: "12px 14px",
     display: "flex",
-    gap: 18,
+    flexDirection: "column",
+    gap: 10,
+  },
+  panelTitle: {
+    fontSize: 12,
+    color: "#93c5fd",
+    letterSpacing: 0.7,
+    textTransform: "uppercase",
+  },
+  statusList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+  defenseBanner: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
     alignItems: "center",
     background: "rgba(127, 29, 29, 0.86)",
     border: "1px solid rgba(248, 113, 113, 0.6)",
-    padding: "10px 18px",
-    borderRadius: 999,
+    padding: "12px 16px",
+    borderRadius: 16,
     color: "#fee2e2",
   },
   defenseTitle: {
@@ -276,17 +335,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
     color: "#fecaca",
   },
-  bottomRow: {
-    alignSelf: "center",
-    display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
-  },
   gestureItem: {
-    background: "rgba(2, 6, 23, 0.78)",
+    background: "rgba(15, 23, 42, 0.88)",
     border: "1px solid rgba(148, 163, 184, 0.3)",
-    borderRadius: 999,
-    padding: "8px 14px",
+    borderRadius: 10,
+    padding: "10px 12px",
     fontSize: 13,
     color: "#dbeafe",
   },

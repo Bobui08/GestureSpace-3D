@@ -1,7 +1,7 @@
 import type { MutableRefObject } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, RoundedBox, Text } from "@react-three/drei";
+import { RoundedBox, Text, useTexture } from "@react-three/drei";
 import { Vector3 } from "three";
 import type { Group } from "three";
 import gsap from "gsap";
@@ -67,6 +67,7 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
   const iconPath = getImagePath(
     NODE_ICON_FILES[data.nodeType as keyof typeof NODE_ICON_FILES] ?? NODE_ICON_FILES.CO_SO_QUAN_CHUNG
   );
+  const iconTexture = useTexture(iconPath);
 
   const syncHovered = (nextValue: boolean) => {
     if (hoveredRef.current === nextValue) return;
@@ -243,10 +244,10 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
       </RoundedBox>
 
       <Text
-        position={[0, 0, 0.13]}
+        position={[0.1, -0.02, 0.13]}
         fontSize={0.135}
         color={isHovered ? "#02121f" : "white"}
-        maxWidth={2.2}
+        maxWidth={1.9}
         textAlign="center"
         anchorX="center"
         anchorY="middle"
@@ -256,20 +257,15 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
         {data.text} {isHeavy ? "(2 tay)" : ""}
       </Text>
 
-      <Html position={[-1.02, 0, 0.18]} transform distanceFactor={6} style={{ pointerEvents: "none" }}>
-        <img
-          src={iconPath}
-          alt={data.nodeType}
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 6,
-            border: "1px solid rgba(255,255,255,0.6)",
-            background: "rgba(2, 6, 23, 0.65)",
-            objectFit: "cover",
-          }}
-        />
-      </Html>
+      <mesh position={[-0.93, 0.28, 0.135]}>
+        <planeGeometry args={[0.38, 0.38]} />
+        <meshBasicMaterial color="#08111d" transparent opacity={0.88} />
+      </mesh>
+
+      <mesh position={[-0.93, 0.28, 0.14]}>
+        <planeGeometry args={[0.3, 0.3]} />
+        <meshBasicMaterial map={iconTexture} transparent toneMapped={false} />
+      </mesh>
 
       {isGrabbed && isHeavy && (
         <mesh position={[0, -1, 0]}>
