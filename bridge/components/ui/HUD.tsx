@@ -14,7 +14,6 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     score,
     currentStage,
     gameState,
-    gameMode,
     startGame,
     gamePhase,
     defenseTimeLeft,
@@ -27,9 +26,6 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     streakCount,
     multiplier,
   } = useGameStore();
-
-  // Command Room mode has its own UI (CommandRoomRoot)
-  if (gameMode === "COMMAND_ROOM") return null;
 
   const [elapsed, setElapsed] = useState(0);
 
@@ -61,13 +57,13 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     return (
       <div style={styles.fullscreenOverlay}>
         <div style={styles.gameOverCard}>
-          <h1 style={styles.gameOverTitle}>Nhiem vu that bai</h1>
+          <h1 style={styles.gameOverTitle}>Nhiệm vụ thất bại</h1>
           <p style={styles.gameOverText}>
-            Mang luoi bi lo hoac mat on dinh. Hay thu lai voi chien luoc an toan hon.
+            Mạng lưới bị thủng hoặc mất ổn định. Hãy thử lại với chiến lược an toàn hơn.
           </p>
-          <p style={styles.gameOverScore}>Diem: {score}</p>
+          <p style={styles.gameOverScore}>Điểm: {score}</p>
           <button style={styles.retryButton} onClick={startGame}>
-            Choi lai
+            Chơi lại
           </button>
         </div>
       </div>
@@ -78,11 +74,11 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     <div style={styles.root}>
       <div style={styles.topRow}>
         <div style={styles.card}>
-          <span style={styles.label}>Diem so</span>
+          <span style={styles.label}>Điểm số</span>
           <span style={styles.value}>{score}</span>
         </div>
         <div style={styles.card}>
-          <span style={styles.label}>Thoi gian</span>
+          <span style={styles.label}>Thời gian</span>
           <span style={styles.value}>{formatTime(elapsed)}</span>
         </div>
         <div style={styles.stageCard}>
@@ -90,35 +86,35 @@ const HUD = ({ gestureLeft, gestureRight }) => {
             <img src={stageImage} alt={stageInfo.title} style={styles.stageImage} />
           </div>
           <div style={styles.stageTextWrap}>
-            <span style={styles.label}>Giai doan</span>
+            <span style={styles.label}>Giai đoạn</span>
             <span style={styles.stageName}>{stageInfo.shortTitle}</span>
             <span style={styles.stageSub}>
               {stageInfo.years} · {stageInfo.title}
             </span>
             <span style={styles.progressText}>
-              Tien do node: {stageProgress.placedCount}/{stageProgress.totalCount}
+              Tiến độ node: {stageProgress.placedCount}/{stageProgress.totalCount}
             </span>
           </div>
         </div>
       </div>
 
       <div style={styles.metricGrid}>
-        <Metric label="Influence" value={influence} color="#24c97a" />
-        <Metric label="Stability" value={stability} color="#2e86ff" />
-        <Metric label="Logistics" value={logistics} color="#eab308" />
-        <Metric label="Exposure" value={exposure} color="#ef4444" inverse />
+        <Metric label="Ảnh hưởng" value={influence} color="#24c97a" />
+        <Metric label="Ổn định" value={stability} color="#2e86ff" />
+        <Metric label="Hậu cần" value={logistics} color="#eab308" />
+        <Metric label="Lộ diện" value={exposure} color="#ef4444" inverse />
       </div>
 
       {gamePhase === "DEFEND" && (
         <div style={styles.defenseBanner}>
-          <span style={styles.defenseTitle}>Can quet dang dien ra</span>
-          <span style={styles.defenseTime}>Con lai: {defenseTimeLeft}s</span>
+          <span style={styles.defenseTitle}>Càn quét đang diễn ra</span>
+          <span style={styles.defenseTime}>Còn lại: {defenseTimeLeft}s</span>
         </div>
       )}
 
       <div style={styles.bottomRow}>
-        <div style={styles.gestureItem}>Tay trai: {gestureLeft}</div>
-        <div style={styles.gestureItem}>Tay phai: {gestureRight}</div>
+        <div style={styles.gestureItem}>Tay trái: {gestureLeft}</div>
+        <div style={styles.gestureItem}>Tay phải: {gestureRight}</div>
         <div style={styles.gestureItem}>
           Streak: {streakCount} {multiplier > 1 ? `· x${multiplier}` : ""}
         </div>

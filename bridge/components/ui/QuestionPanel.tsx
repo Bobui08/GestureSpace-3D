@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useGameStore } from "../../store/gameStore";
 import { STAGE_META } from "../../data/gameData";
+
+const ANSWER_REVEAL_MS = 3000;
 
 const QuestionPanel = () => {
   const {
@@ -12,6 +14,8 @@ const QuestionPanel = () => {
   } = useGameStore();
   const [locked, setLocked] = useState(false);
   const [feedback, setFeedback] = useState<string>("");
+  const [feedbackCorrect, setFeedbackCorrect] = useState<boolean | null>(null);
+  const answerTimeoutRef = useRef<number | null>(null);
 
   const stageMeta = STAGE_META[currentStage];
   const stageProgress = stageQuizProgress[currentStage] ?? {
@@ -26,15 +30,38 @@ const QuestionPanel = () => {
     [stageProgress.asked, totalQuiz]
   );
 
+  useEffect(() => {
+    setFeedback("");
+    setFeedbackCorrect(null);
+    setLocked(false);
+  }, [currentQuestion?.id, gameState]);
+
+  useEffect(() => {
+    return () => {
+      if (answerTimeoutRef.current !== null) {
+        window.clearTimeout(answerTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (gameState !== "QUIZ" || !currentQuestion) return null;
 
   const handleAnswer = (index: number) => {
     if (locked) return;
     setLocked(true);
-    const result = answerQuiz(index);
-    const text = result.correct ? "Dung. " : "Chua dung. ";
-    setFeedback(`${text}${result.explanation ?? ""}`);
-    setTimeout(() => setLocked(false), 300);
+    const isCorrect = index === currentQuestion.correctIndex;
+    const text = isCorrect ? "Đúng. " : "Chưa đúng. ";
+    setFeedbackCorrect(isCorrect);
+    setFeedback(`${text}${currentQuestion.explanation ?? ""}`);
+
+    if (answerTimeoutRef.current !== null) {
+      window.clearTimeout(answerTimeoutRef.current);
+    }
+
+    answerTimeoutRef.current = window.setTimeout(() => {
+      answerTimeoutRef.current = null;
+      answerQuiz(index);
+    }, ANSWER_REVEAL_MS);
   };
 
   return (
@@ -64,7 +91,16 @@ const QuestionPanel = () => {
           ))}
         </div>
 
-        {feedback && <div style={styles.feedback}>{feedback}</div>}
+        {feedback && (
+          <div
+            style={{
+              ...styles.feedback,
+              ...(feedbackCorrect === false ? styles.feedbackWrong : styles.feedbackCorrect),
+            }}
+          >
+            {feedback}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -147,13 +183,20 @@ const styles: Record<string, React.CSSProperties> = {
   },
   feedback: {
     marginTop: 14,
-    color: "#c7f9cc",
     fontSize: 14,
     lineHeight: 1.4,
     padding: "10px 12px",
     borderRadius: 10,
+  },
+  feedbackCorrect: {
+    color: "#c7f9cc",
     border: "1px solid rgba(34, 197, 94, 0.4)",
     background: "rgba(20, 83, 45, 0.4)",
+  },
+  feedbackWrong: {
+    color: "#fecaca",
+    border: "1px solid rgba(248, 113, 113, 0.5)",
+    background: "rgba(127, 29, 29, 0.55)",
   },
 };
 

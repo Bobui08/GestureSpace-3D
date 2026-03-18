@@ -1,51 +1,57 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Group, Vector3 } from "three";
+import { Vector3 } from "three";
+import type { Group } from "three";
 import HouseZone from "./HouseZone";
 import KnowledgeBlock from "./KnowledgeBlock";
 import { useGameStore } from "../../store/gameStore";
 import { BLOCKS, SLOTS } from "../../data/gameData";
 import HandModel from "./HandModel";
+import type { HandsResultsRef, Landmark } from "../../hooks/useHandTracking";
 
-const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
+const OFFSCREEN_Y = -999;
+
+const updateHandPosition = (target: Vector3, fingerTip: Landmark | undefined, viewport: { width: number; height: number }) => {
+  if (!fingerTip) {
+    target.set(0, OFFSCREEN_Y, 0);
+    return;
+  }
+
+  target.set(
+    (1 - fingerTip.x) * viewport.width - viewport.width / 2,
+    (1 - fingerTip.y) * viewport.height - viewport.height / 2,
+    0
+  );
+};
+
+const Scene = ({ handsResultsRef }: { handsResultsRef: HandsResultsRef }) => {
   const groupRef = useRef<Group>(null);
   const { currentStage, placedBlocks, placeBlock } = useGameStore();
+  const grabbedBlockIdRef = useRef<string | null>(null);
+  const rightHandPosRef = useRef(new Vector3(0, OFFSCREEN_Y, 0));
+  const leftHandPosRef = useRef(new Vector3(0, OFFSCREEN_Y, 0));
 
-  const [availableBlocks, setAvailableBlocks] = useState<any[]>([]);
-  const [grabbedBlockId, setGrabbedBlockId] = useState<string | null>(null);
-  const rightHandPosRef = useRef(new Vector3(0, 0, 0));
-  const leftHandPosRef = useRef(new Vector3(0, 0, 0));
-  const rightHandTargetRef = useRef(new Vector3(0, 0, 0));
-  const leftHandTargetRef = useRef(new Vector3(0, 0, 0));
-
-  useEffect(() => {
+  const availableBlocks = useMemo(() => {
     const placedIds = (placedBlocks[currentStage] ?? []).map((b) => b.id);
     const stageBlocks = BLOCKS[currentStage] ?? [];
-    const remaining = stageBlocks.filter((b) => !placedIds.includes(b.id));
-
-    setAvailableBlocks(
-      remaining.map((block, index) => ({
+    return stageBlocks
+      .filter((b) => !placedIds.includes(b.id))
+      .map((block, index) => ({
         ...block,
         position: [index % 2 === 0 ? -6 : -8, 1.8 + index * 1.3, 0] as [number, number, number],
         originalPosition: [index % 2 === 0 ? -6 : -8, 1.8 + index * 1.3, 0] as [number, number, number],
-      }))
-    );
+      }));
   }, [currentStage, placedBlocks]);
 
   useFrame(({ viewport }) => {
-    if (rightHand?.[8]) {
-      const x = rightHand[8].x * viewport.width - viewport.width / 2;
-      const y = (1 - rightHand[8].y) * viewport.height - viewport.height / 2;
-      rightHandTargetRef.current.set(x, y, 0);
-      rightHandPosRef.current.lerp(rightHandTargetRef.current, 0.34);
-    }
-    if (leftHand?.[8]) {
-      const x = leftHand[8].x * viewport.width - viewport.width / 2;
-      const y = (1 - leftHand[8].y) * viewport.height - viewport.height / 2;
-      leftHandTargetRef.current.set(x, y, 0);
-      leftHandPosRef.current.lerp(leftHandTargetRef.current, 0.34);
-    }
+    const { leftHand, rightHand } = handsResultsRef.current;
+    updateHandPosition(rightHandPosRef.current, rightHand?.[8], viewport);
+    updateHandPosition(leftHandPosRef.current, leftHand?.[8], viewport);
   });
+
+  useEffect(() => {
+    grabbedBlockIdRef.current = null;
+  }, [currentStage]);
 
   const handleDrop = (dropPos: Vector3, block: any) => {
     const stageSlots = SLOTS[currentStage] ?? [];
@@ -64,7 +70,7 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
     }
 
     if (placementResult?.success) {
-      setGrabbedBlockId(null);
+      grabbedBlockIdRef.current = null;
       return placementResult;
     }
     return { success: false, reason: "NO_NEARBY_SLOT" };
@@ -76,19 +82,20 @@ const Scene = ({ leftHand, rightHand, gestureLeft, gestureRight }) => {
         <HouseZone />
       </group>
 
-      <HandModel landmarks={leftHand} isRight={false} />
-      <HandModel landmarks={rightHand} isRight />
+      <HandModel handsResultsRef={handsResultsRef} hand="left" isRight={false} />
+      <HandModel handsResultsRef={handsResultsRef} hand="right" isRight />
 
       {availableBlocks.map((block) => (
         <KnowledgeBlock
           key={block.id}
           data={block}
-          handPos={rightHandPosRef.current}
-          leftHandPos={leftHandPosRef.current}
-          gestureRight={gestureRight}
-          gestureLeft={gestureLeft}
-          grabbedBlockId={grabbedBlockId}
-          setGrabbedBlockId={setGrabbedBlockId}
+          rightHandPosRef={rightHandPosRef}
+          leftHandPosRef={leftHandPosRef}
+          handsResultsRef={handsResultsRef}
+          grabbedBlockIdRef={grabbedBlockIdRef}
+          setGrabbedBlockId={(id) => {
+            grabbedBlockIdRef.current = id;
+          }}
           onDrop={(_, pos) => handleDrop(pos, block)}
         />
       ))}

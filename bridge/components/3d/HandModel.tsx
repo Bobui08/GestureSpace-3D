@@ -1,137 +1,111 @@
-import React, { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Mesh, Vector3 } from "three";
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Vector3 } from 'three';
+import type { Group, Mesh } from 'three';
+import type { HandsResultsRef, Landmark } from '../../hooks/useHandTracking';
 
-interface Landmark {
-  x: number;
-  y: number;
-  z?: number;
-}
-
-interface HandModelProps {
-  landmarks: Landmark[] | null;
-  isRight: boolean;
-}
-
-const CONNECTIONS: [number, number][] = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 4],
-  [0, 5],
-  [5, 6],
-  [6, 7],
-  [7, 8],
-  [0, 9],
-  [9, 10],
-  [10, 11],
-  [11, 12],
-  [0, 13],
-  [13, 14],
-  [14, 15],
-  [15, 16],
-  [0, 17],
-  [17, 18],
-  [18, 19],
-  [19, 20],
-  [5, 9],
-  [9, 13],
-  [13, 17],
+const CONNECTIONS = [
+    [0, 1], [1, 2], [2, 3], [3, 4], // Thumb
+    [0, 5], [5, 6], [6, 7], [7, 8], // Index
+    [0, 9], [9, 10], [10, 11], [11, 12], // Middle
+    [0, 13], [13, 14], [14, 15], [15, 16], // Ring
+    [0, 17], [17, 18], [18, 19], [19, 20], // Pinky
+    [5, 9], [9, 13], [13, 17] // Palm
 ];
 
-const HAND_JOINT_COUNT = 21;
+type HandModelProps = {
+    handsResultsRef: HandsResultsRef;
+    hand: 'left' | 'right';
+    isRight: boolean;
+};
 
-const HandModel: React.FC<HandModelProps> = ({ landmarks, isRight }) => {
-  const jointsRef = useRef<(Mesh | null)[]>([]);
-  const bonesRef = useRef<(Mesh | null)[]>([]);
-  const smoothPointsRef = useRef<Vector3[]>(
-    Array.from({ length: HAND_JOINT_COUNT }, () => new Vector3())
-  );
-  const targetPointsRef = useRef<Vector3[]>(
-    Array.from({ length: HAND_JOINT_COUNT }, () => new Vector3())
-  );
-  const tempMidRef = useRef(new Vector3());
-
-  const project3D = (landmark: Landmark, viewport: { width: number; height: number }) => {
-    const x = landmark.x * viewport.width - viewport.width / 2;
-    const y = (1 - landmark.y) * viewport.height - viewport.height / 2;
-    const z = -(landmark.z ?? 0) * viewport.width;
-    return { x, y, z };
-  };
-
-  useFrame(({ viewport }, delta) => {
-    if (!landmarks) return;
-
-    const blend = Math.min(0.6, Math.max(0.22, delta * 10));
-
-    for (let i = 0; i < HAND_JOINT_COUNT; i += 1) {
-      const lm = landmarks[i];
-      const target = targetPointsRef.current[i];
-      const smooth = smoothPointsRef.current[i];
-      const jointMesh = jointsRef.current[i];
-
-      if (!lm) continue;
-
-      const projected = project3D(lm, viewport);
-      target.set(projected.x, projected.y, projected.z);
-      smooth.lerp(target, blend);
-
-      if (jointMesh) {
-        jointMesh.position.copy(smooth);
-      }
+const project3D = (target: Vector3, landmark: Landmark | undefined, viewport: { width: number; height: number }) => {
+    if (!landmark) {
+        target.set(0, 0, 0);
+        return target;
     }
 
-    for (let i = 0; i < CONNECTIONS.length; i += 1) {
-      const [startIdx, endIdx] = CONNECTIONS[i];
-      const bone = bonesRef.current[i];
-      if (!bone) continue;
+    target.set(
+        (1 - landmark.x) * viewport.width - viewport.width / 2,
+        (1 - landmark.y) * viewport.height - viewport.height / 2,
+        -((landmark.z ?? 0) * viewport.width)
+    );
 
-      const start = smoothPointsRef.current[startIdx];
-      const end = smoothPointsRef.current[endIdx];
-      const midpoint = tempMidRef.current.copy(start).lerp(end, 0.5);
-      const length = start.distanceTo(end);
+    return target;
+};
 
-      bone.position.copy(midpoint);
-      bone.lookAt(end);
-      bone.rotateX(Math.PI / 2);
-      bone.scale.set(1, Math.max(0.001, length), 1);
-    }
-  });
+const HandModel = ({ handsResultsRef, hand, isRight }: HandModelProps) => {
+    const groupRef = useRef<Group>(null);
+    const jointsRef = useRef<(Mesh | null)[]>([]);
+    const bonesRef = useRef<(Mesh | null)[]>([]);
+    const projectedPointRef = useRef(new Vector3());
+    const midpointRef = useRef(new Vector3());
 
-  if (!landmarks) return null;
+    useFrame(({ viewport }) => {
+        const landmarks = hand === 'right' ? handsResultsRef.current.rightHand : handsResultsRef.current.leftHand;
 
-  return (
-    <group>
-      {Array.from({ length: HAND_JOINT_COUNT }).map((_, idx) => (
-        <mesh
-          key={`joint-${idx}`}
-          ref={(el) => {
-            jointsRef.current[idx] = el;
-          }}
-          scale={[0.15, 0.15, 0.15]}
-        >
-          <sphereGeometry args={[1, 16, 16]} />
-          <meshStandardMaterial
-            color={isRight ? "#4CAF50" : "#2196F3"}
-            emissive={isRight ? "#1B5E20" : "#0B3D91"}
-            emissiveIntensity={0.22}
-          />
-        </mesh>
-      ))}
+        if (!groupRef.current) return;
+        if (!landmarks) {
+            groupRef.current.visible = false;
+            return;
+        }
+        groupRef.current.visible = true;
 
-      {CONNECTIONS.map((_, idx) => (
-        <mesh
-          key={`bone-${idx}`}
-          ref={(el) => {
-            bonesRef.current[idx] = el;
-          }}
-        >
-          <cylinderGeometry args={[0.08, 0.08, 1, 8]} />
-          <meshStandardMaterial color="white" transparent opacity={0.6} />
-        </mesh>
-      ))}
-    </group>
-  );
+        // Update Joints
+        landmarks.forEach((lm, i) => {
+            if (jointsRef.current[i]) {
+                jointsRef.current[i]!.position.copy(project3D(projectedPointRef.current, lm, viewport));
+            }
+        });
+
+        // Update Bones
+        CONNECTIONS.forEach((pair, i) => {
+            if (bonesRef.current[i] && jointsRef.current[pair[0]] && jointsRef.current[pair[1]]) {
+                const bone = bonesRef.current[i]!;
+                const start = jointsRef.current[pair[0]]!.position;
+                const end = jointsRef.current[pair[1]]!.position;
+
+                // Position is midpoint
+                bone.position.copy(midpointRef.current.copy(start).lerp(end, 0.5));
+
+                // Orientation
+                bone.lookAt(end);
+                bone.rotateX(Math.PI / 2); // Align cylinder Y with direction
+
+                // Length
+                const dist = start.distanceTo(end);
+                bone.scale.set(1, dist, 1);
+            }
+        });
+    });
+
+    return (
+        <group ref={groupRef} visible={false}>
+            {/* Joints */}
+            {Array.from({ length: 21 }).map((_, i) => (
+                <mesh
+                    key={`joint-${i}`}
+                    ref={el => jointsRef.current[i] = el}
+                    scale={[0.15, 0.15, 0.15]}
+                >
+                    <sphereGeometry args={[1, 16, 16]} />
+                    <meshStandardMaterial color={isRight ? "#4CAF50" : "#2196F3"} emissive={0.2} />
+                </mesh>
+            ))}
+
+            {/* Bones */}
+            {CONNECTIONS.map((_, i) => (
+                <mesh
+                    key={`bone-${i}`}
+                    ref={el => bonesRef.current[i] = el}
+                >
+                    {/* Unit cylinder, scaled later */}
+                    <cylinderGeometry args={[0.08, 0.08, 1, 8]} />
+                    <meshStandardMaterial color="white" transparent opacity={0.6} />
+                </mesh>
+            ))}
+        </group>
+    );
 };
 
 export default HandModel;

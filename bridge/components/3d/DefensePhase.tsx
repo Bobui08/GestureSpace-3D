@@ -1,3 +1,4 @@
+import type { MutableRefObject } from 'react';
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text, Billboard } from '@react-three/drei';
@@ -5,14 +6,23 @@ import * as THREE from 'three';
 import { useGameStore } from '../../store/gameStore';
 import { VirusModel, StarModel } from './ProjectileModels';
 import { HitEffect } from './ParticleSystem';
+import type { HandsResultsRef, Landmark } from '../../hooks/useHandTracking';
 
 // Projectile Type: 'BAD' (Vice) or 'GOOD' (Value)
 type ProjectileType = 'BAD' | 'GOOD';
 
-const BAD_LABELS = ['Can quet', 'Lo co so', 'Danh pha tiep te', 'Ap chien luoc', 'Do bo quan My', 'Nhiu thong tin'];
-const GOOD_LABELS = ['Chi vien', 'Bao mat', 'Doan ket', 'Bam dan', 'Dau tri', 'Phan tan luc luong'];
+const BAD_LABELS = ['Càn quét', 'Lộ cơ sở', 'Đánh phá tiếp tế', 'Ấp chiến lược', 'Đổ bộ quân Mỹ', 'Nhiễu thông tin'];
+const GOOD_LABELS = ['Chi viện', 'Bảo mật', 'Đoàn kết', 'Bám dân', 'Đấu trí', 'Phân tán lực lượng'];
 
-const MovingProjectile = ({ id, pos, type, onHitHouse, onHitHand, leftHandPos, rightHandPos }) => {
+const MovingProjectile = ({ id, pos, type, onHitHouse, onHitHand, leftHandPosRef, rightHandPosRef }: {
+    id: number;
+    pos: THREE.Vector3;
+    type: ProjectileType;
+    onHitHouse: (position: THREE.Vector3) => void;
+    onHitHand: (position: THREE.Vector3) => void;
+    leftHandPosRef: MutableRefObject<THREE.Vector3 | null>;
+    rightHandPosRef: MutableRefObject<THREE.Vector3 | null>;
+}) => {
     const ref = useRef<THREE.Group>(null);
     const [isDead, setIsDead] = useState(false);
     const speed = useRef(Math.random() * 2 + 3); // Speed 3-5
@@ -52,7 +62,7 @@ const MovingProjectile = ({ id, pos, type, onHitHouse, onHitHand, leftHandPos, r
             return distXY < 0.7 && zDiff < 4.0;
         };
 
-        if (checkHand(leftHandPos) || checkHand(rightHandPos)) {
+        if (checkHand(leftHandPosRef.current) || checkHand(rightHandPosRef.current)) {
             onHitHand(ref.current.position);
             setIsDead(true);
         }
@@ -117,46 +127,49 @@ const DamageFlash = ({ trigger }) => {
     );
 };
 
-const DefensePhase = ({ leftHand, rightHand }) => {
+const calculateWorldPos = (target: THREE.Vector3, hand: Landmark[] | null) => {
+    if (!hand || !hand[8]) return null;
+    target.set((0.5 - hand[8].x) * 16, (0.5 - hand[8].y) * 10 + 2, 5);
+    return target;
+};
+
+const DefensePhase = ({ handsResultsRef }: { handsResultsRef: HandsResultsRef }) => {
     const { damageHouse, healHouse, gamePhase } = useGameStore();
     const [projectiles, setProjectiles] = useState<{ id: number, pos: THREE.Vector3, type: ProjectileType }[]>([]);
     const [effects, setEffects] = useState<{ id: number, pos: THREE.Vector3, color: string }[]>([]);
     const [damageTrigger, setDamageTrigger] = useState(0); // Trigger for flash
     const lastSpawnTime = useRef(0);
-    const leftPosRef = useRef<THREE.Vector3 | null>(null);
-    const rightPosRef = useRef<THREE.Vector3 | null>(null);
-
-    // Convert hand landmarks to 3D
-    const calculateWorldPos = (hand) => {
-        if (!hand || !hand[8]) return null;
-        const x = (hand[8].x - 0.5) * 16;
-        const y = (0.5 - hand[8].y) * 10;
-        return new THREE.Vector3(x, y + 2, 5);
-    };
-
-    const leftTarget = useMemo(() => calculateWorldPos(leftHand), [leftHand]);
-    const rightTarget = useMemo(() => calculateWorldPos(rightHand), [rightHand]);
+    const leftHandPosRef = useRef<THREE.Vector3 | null>(null);
+    const rightHandPosRef = useRef<THREE.Vector3 | null>(null);
+    const leftShieldRef = useRef<THREE.Mesh>(null);
+    const rightShieldRef = useRef<THREE.Mesh>(null);
+    const leftTargetRef = useRef(new THREE.Vector3());
+    const rightTargetRef = useRef(new THREE.Vector3());
 
     const addEffect = (pos, color) => {
         setEffects(prev => [...prev, { id: Date.now() + Math.random(), pos: pos.clone(), color }]);
     };
 
     useFrame((state) => {
+        const { leftHand, rightHand } = handsResultsRef.current;
+        leftHandPosRef.current = calculateWorldPos(leftTargetRef.current, leftHand);
+        rightHandPosRef.current = calculateWorldPos(rightTargetRef.current, rightHand);
+
+        if (leftShieldRef.current) {
+            leftShieldRef.current.visible = Boolean(leftHandPosRef.current);
+            if (leftHandPosRef.current) {
+                leftShieldRef.current.position.copy(leftHandPosRef.current);
+            }
+        }
+
+        if (rightShieldRef.current) {
+            rightShieldRef.current.visible = Boolean(rightHandPosRef.current);
+            if (rightHandPosRef.current) {
+                rightShieldRef.current.position.copy(rightHandPosRef.current);
+            }
+        }
+
         if (gamePhase !== 'DEFEND') return;
-
-        if (leftTarget) {
-            if (!leftPosRef.current) leftPosRef.current = leftTarget.clone();
-            leftPosRef.current.lerp(leftTarget, 0.34);
-        } else {
-            leftPosRef.current = null;
-        }
-
-        if (rightTarget) {
-            if (!rightPosRef.current) rightPosRef.current = rightTarget.clone();
-            rightPosRef.current.lerp(rightTarget, 0.34);
-        } else {
-            rightPosRef.current = null;
-        }
 
         const time = state.clock.getElapsedTime();
         if (time - lastSpawnTime.current > 1.2) {
@@ -208,26 +221,22 @@ const DefensePhase = ({ leftHand, rightHand }) => {
     return (
         <group>
             {/* Hand Visualizers (Shields) */}
-            {leftPosRef.current && (
-                <mesh position={leftPosRef.current}>
-                    <ringGeometry args={[0.2, 0.6, 32]} />
-                    <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
-                </mesh>
-            )}
-            {rightPosRef.current && (
-                <mesh position={rightPosRef.current}>
-                    <ringGeometry args={[0.2, 0.6, 32]} />
-                    <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
-                </mesh>
-            )}
+            <mesh ref={leftShieldRef} visible={false}>
+                <ringGeometry args={[0.2, 0.6, 32]} />
+                <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
+            </mesh>
+            <mesh ref={rightShieldRef} visible={false}>
+                <ringGeometry args={[0.2, 0.6, 32]} />
+                <meshBasicMaterial color="#00f3ff" side={THREE.DoubleSide} />
+            </mesh>
 
             {projectiles.map(p => (
                 <MovingProjectile
                     key={p.id}
                     {...p}
                     onHitHouse={(pos) => handleHitHouse(p.id, p.type, pos)}
-                    leftHandPos={leftPosRef.current}
-                    rightHandPos={rightPosRef.current}
+                    leftHandPosRef={leftHandPosRef}
+                    rightHandPosRef={rightHandPosRef}
                     onHitHand={(pos) => handleHitHand(p.id, p.type, pos)}
                 />
             ))}

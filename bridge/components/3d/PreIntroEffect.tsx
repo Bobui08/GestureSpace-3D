@@ -4,30 +4,30 @@ import { Text, Stars, PerspectiveCamera, Html } from "@react-three/drei";
 import { FlagSystem } from "./FlagSystem";
 import { useGameStore } from "../../store/gameStore";
 import * as THREE from "three";
+import type { HandsResultsRef } from "../../hooks/useHandTracking";
 
 interface PreIntroEffectProps {
-  leftHand?: any;
-  rightHand?: any;
-  gestureLeft?: string;
-  gestureRight?: string;
+  handsResultsRef: HandsResultsRef;
 }
 
 const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
-  leftHand,
-  rightHand,
+  handsResultsRef,
 }) => {
   // Restore missing state variables
   const groupRef = useRef<THREE.Group>(null);
   const { setGameState } = useGameStore();
-  const [showButton, setShowButton] = useState(false);
   const [gestureDistance, setGestureDistance] = useState(0.5);
   const [hasHands, setHasHands] = useState(false);
+  const gestureDistanceRef = useRef(0.5);
+  const hasHandsRef = useRef(false);
 
   // Hand Cursor State for visual feedback
   const [cursorPos, setCursorPos] = useState<{ x: number, y: number } | null>(null);
+  const cursorPosRef = useRef<{ x: number, y: number } | null>(null);
 
   // Expansion Hold State
   const [expansionHoldTime, setExpansionHoldTime] = useState(0);
+  const expansionHoldTimeRef = useRef(0);
   const expansionTargetTime = 3; // Seconds to hold (Increased from 1.5s)
 
   // Target distance for smoothing
@@ -37,6 +37,7 @@ const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
   const leftHandHistory = useRef<{ x: number; time: number }[]>([]);
   const rightHandHistory = useRef<{ x: number; time: number }[]>([]);
   const [isSwiping, setIsSwiping] = useState(false);
+  const isSwipingRef = useRef(false);
 
   const detectSwipe = (
     hand: any,
@@ -76,8 +77,14 @@ const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
     return false;
   };
 
-  // Check for swipes and update cursor
-  useEffect(() => {
+  // Gentle rotation animation & smoothing without per-frame React rerenders
+  useFrame((state, delta) => {
+    const { leftHand, rightHand } = handsResultsRef.current;
+
+    if (!groupRef.current) return;
+    const t = state.clock.getElapsedTime();
+    groupRef.current.rotation.y = Math.sin(t * 0.2) * 0.1;
+
     let swipeDetected = false;
     let activeHand = null;
 
@@ -90,45 +97,29 @@ const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
       activeHand = rightHand[0] || activeHand;
     }
 
-    // Update visual cursor position
     if (activeHand) {
-      setCursorPos({ x: activeHand.x * 100, y: activeHand.y * 100 });
-    } else {
+      const nextCursor = { x: (1 - activeHand.x) * 100, y: activeHand.y * 100 };
+      const currentCursor = cursorPosRef.current;
+      if (
+        !currentCursor ||
+        Math.abs(currentCursor.x - nextCursor.x) > 0.4 ||
+        Math.abs(currentCursor.y - nextCursor.y) > 0.4
+      ) {
+        cursorPosRef.current = nextCursor;
+        setCursorPos(nextCursor);
+      }
+    } else if (cursorPosRef.current !== null) {
+      cursorPosRef.current = null;
       setCursorPos(null);
     }
 
-    if (swipeDetected && !isSwiping) {
+    if (swipeDetected && !isSwipingRef.current) {
+      isSwipingRef.current = true;
       setIsSwiping(true);
       handleStart();
     }
-  }, [leftHand, rightHand]);
 
-  // Expansion Trigger Logic
-  useFrame((state, delta) => {
-    if (hasHands && gestureDistance > 0.8) {
-      setExpansionHoldTime(prev => {
-        const newVal = prev + delta;
-        if (newVal >= expansionTargetTime) { // Use showButton as a "started" check or just fire
-          handleStart();
-          return 0; // Reset
-        }
-        return newVal;
-      });
-    } else {
-      setExpansionHoldTime(prev => Math.max(0, prev - delta * 2)); // Decay quickly
-    }
-  });
-
-  // Show button after 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => setShowButton(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Calculate hand tracking distance (same logic as family-builder3d)
-  useEffect(() => {
     if (leftHand && rightHand) {
-      // Two hands detected - measure distance between wrists
       const hand1Wrist = leftHand[0];
       const hand2Wrist = rightHand[0];
 
@@ -137,50 +128,69 @@ const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
           Math.pow(hand2Wrist.x - hand1Wrist.x, 2) +
           Math.pow(hand2Wrist.y - hand1Wrist.y, 2)
         );
-
-        // Normalize distance (0.1 to 0.8 range -> 0 to 1)
-        const normalizedDist = Math.min(Math.max((rawDist - 0.1) / 0.6, 0), 1);
-        targetDistance.current = normalizedDist;
-        setHasHands(true);
+        targetDistance.current = Math.min(Math.max((rawDist - 0.1) / 0.6, 0), 1);
+        if (!hasHandsRef.current) {
+          hasHandsRef.current = true;
+          setHasHands(true);
+        }
       }
     } else if (leftHand || rightHand) {
-      // One hand detected - detect pinch
       const hand = leftHand || rightHand;
-      const thumbTip = hand[4];
-      const indexTip = hand[8];
+      const thumbTip = hand?.[4];
+      const indexTip = hand?.[8];
 
       if (thumbTip && indexTip) {
         const pinchDist = Math.sqrt(
           Math.pow(indexTip.x - thumbTip.x, 2) +
           Math.pow(indexTip.y - thumbTip.y, 2)
         );
-        const isPinching = pinchDist < 0.05;
-
-        // SINGLE HAND LOGIC CHANGE:
-        // Pinch = 0.2 (Compress)
-        // Open = 1.0 (Expand) - This enables 1-hand trigger
-        targetDistance.current = isPinching ? 0.2 : 1.0;
-        setHasHands(true);
+        targetDistance.current = pinchDist < 0.05 ? 0.2 : 1.0;
+        if (!hasHandsRef.current) {
+          hasHandsRef.current = true;
+          setHasHands(true);
+        }
       }
     } else {
-      setHasHands(false);
       targetDistance.current = 0.5;
+      if (hasHandsRef.current) {
+        hasHandsRef.current = false;
+        setHasHands(false);
+      }
     }
-  }, [leftHand, rightHand]);
 
-  // Gentle rotation animation & Smoothing gesture distance
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    const t = state.clock.getElapsedTime();
-    groupRef.current.rotation.y = Math.sin(t * 0.2) * 0.1;
+    const nextGestureDistance = THREE.MathUtils.lerp(gestureDistanceRef.current, targetDistance.current, 0.05);
+    if (Math.abs(nextGestureDistance - gestureDistanceRef.current) > 0.003) {
+      gestureDistanceRef.current = nextGestureDistance;
+      setGestureDistance(nextGestureDistance);
+    }
 
-    // Smoothly interpolate gesture distance to avoid instant jumps with single-hand trigger
-    setGestureDistance(prev => {
-      const next = THREE.MathUtils.lerp(prev, targetDistance.current, 0.05); // 0.05 for smoother/slower transition
-      if (Math.abs(next - prev) < 0.0001) return prev;
-      return next;
-    });
+    const shouldCharge = hasHandsRef.current && gestureDistanceRef.current > 0.8;
+    const nextHoldTime = shouldCharge
+      ? expansionHoldTimeRef.current + delta
+      : Math.max(0, expansionHoldTimeRef.current - delta * 2);
+
+    if (nextHoldTime >= expansionTargetTime) {
+      expansionHoldTimeRef.current = 0;
+      setExpansionHoldTime(0);
+      handleStart();
+    } else if (Math.abs(nextHoldTime - expansionHoldTimeRef.current) > 0.03) {
+      expansionHoldTimeRef.current = nextHoldTime;
+      setExpansionHoldTime(nextHoldTime);
+    } else {
+      expansionHoldTimeRef.current = nextHoldTime;
+    }
   });
+
+  useEffect(() => {
+    if (!isSwiping) return;
+
+    const timer = setTimeout(() => {
+      isSwipingRef.current = false;
+      setIsSwiping(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [isSwiping]);
 
   const handleStart = () => {
     setGameState("INTRO");
@@ -326,46 +336,40 @@ const PreIntroEffect: React.FC<PreIntroEffectProps> = ({
           </Html>
         )}
 
-        {/* Interactive Instruction with HTML Button */}
-        {showButton && (
-          <Html position={[25, 14, 2]}>
-            <div style={{ textAlign: "right" }}>
-              <button
-                onClick={handleStart}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #DA251D 0%, #ff6b6b 100%)",
-                  border: "2px solid #FFFF00",
-                  color: "#FFFF00",
-                  fontSize: "0.9rem",
-                  fontWeight: "bold",
-                  padding: "15px 25px",
-                  borderRadius: "50px",
-                  cursor: "pointer",
-                  boxShadow:
-                    "0 0 20px rgba(218, 37, 29, 0.8), 0 0 40px rgba(255, 255, 0, 0.4)",
-                  transition: "all 0.3s ease",
-                  fontFamily: "Arial, sans-serif",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "scale(1.1)";
-                  e.currentTarget.style.boxShadow =
-                    "0 0 30px rgba(218, 37, 29, 1), 0 0 60px rgba(255, 255, 0, 0.6)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow =
-                    "0 0 20px rgba(218, 37, 29, 0.8), 0 0 40px rgba(255, 255, 0, 0.4)";
-                }}
-              >
-                ⭐ BẮT ĐẦU ⭐
-              </button>
-            </div>
-          </Html>
-        )}
+        <Html fullscreen>
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: "56px",
+              transform: "translateX(-50%)",
+              minWidth: "280px",
+              textAlign: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <button
+              onClick={handleStart}
+              style={{
+                pointerEvents: "auto",
+                color: "#fef08a",
+                fontSize: "1rem",
+                fontWeight: 800,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                textShadow: "0 0 18px rgba(254, 240, 138, 0.55)",
+                padding: "12px 26px",
+                borderRadius: "999px",
+                border: "2px solid rgba(254, 240, 138, 0.85)",
+                background: "rgba(218, 37, 29, 0.78)",
+                boxShadow: "0 0 20px rgba(218, 37, 29, 0.45), 0 0 30px rgba(254, 240, 138, 0.2)",
+                cursor: "pointer",
+              }}
+            >
+              BẮT ĐẦU
+            </button>
+          </div>
+        </Html>
       </group>
     </>
   );
