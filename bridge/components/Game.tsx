@@ -45,15 +45,18 @@ const Game = () => {
                 ref={videoRef}
                 style={{
                     position: 'absolute',
-                    width: '160px',
-                    height: '120px',
-                    bottom: '20px',
-                    left: '20px',
-                    borderRadius: '10px',
-                    zIndex: 10,
+                    top: '18px',
+                    left: '18px',
+                    width: '220px',
+                    height: '150px',
+                    borderRadius: '14px',
+                    zIndex: 140,
                     transform: 'scaleX(-1)',
-                    opacity: 0.8,
-                    border: '2px solid rgba(0, 243, 255, 0.3)'
+                    opacity: 0.9,
+                    objectFit: 'cover',
+                    border: '1px solid rgba(125, 211, 252, 0.45)',
+                    background: 'rgba(2, 6, 23, 0.72)',
+                    boxShadow: '0 12px 30px rgba(2, 6, 23, 0.35)'
                 }}
             />
 

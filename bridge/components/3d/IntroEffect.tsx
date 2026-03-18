@@ -33,13 +33,13 @@ const IntroEffect = () => {
               color: "#f8fafc",
             }}
           >
-            REVOLUTION NETWORK
+            MẠNG LƯỚI CÁCH MẠNG VIỆT NAM 
           </p>
           <p style={{ margin: "0 0 12px 0", fontSize: 14, color: "#bae6fd", lineHeight: 1.5 }}>
             Chủ đề: Sự lãnh đạo của Đảng với cách mạng hai miền (1954-1965)
           </p>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
-            Kéo node bằng tay phải, node chỉ huy cần 2 tay. Hoàn thành mạng lưới mỗi giai đoạn
+            Kéo node bằng tay trái, node chỉ huy cần 2 tay. Hoàn thành mạng lưới mỗi giai đoạn
             để mở bộ câu hỏi lịch sử.
           </p>
           <button

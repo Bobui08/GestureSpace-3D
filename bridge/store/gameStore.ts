@@ -280,16 +280,24 @@ const normalizedQuestionBank: Record<string, Question[]> = Array.isArray(questio
     ? normalizeLegacyQuestionBank(questionBank)
     : createEmptyQuestionBank();
 
-const getQuestionsByStage = (stageId: string): Question[] => {
-  return normalizedQuestionBank[stageId] ?? [];
+const getQuizPool = (): Question[] => {
+  const uniqueQuestions = new Map<string, Question>();
+
+  STAGE_SEQUENCE.forEach((stageId) => {
+    (normalizedQuestionBank[stageId] ?? []).forEach((question) => {
+      uniqueQuestions.set(question.id, question);
+    });
+  });
+
+  return Array.from(uniqueQuestions.values());
 };
 
-const pickQuestion = (stageId: string, usedIds: string[]): Question | null => {
-  const stageQuestions = getQuestionsByStage(stageId);
-  if (!stageQuestions.length) return null;
+const pickQuestion = (excludedIds: string[]): Question | null => {
+  const quizPool = getQuizPool();
+  if (!quizPool.length) return null;
 
-  const available = stageQuestions.filter((q) => !usedIds.includes(q.id));
-  const pool = available.length > 0 ? available : stageQuestions;
+  const available = quizPool.filter((q) => !excludedIds.includes(q.id));
+  const pool = available.length > 0 ? available : quizPool;
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
@@ -455,20 +463,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   transitionToQuiz: () => {
     const { currentStage, stageQuizProgress, usedQuestionIds } = get();
-    const progress = stageQuizProgress[currentStage] ?? {
-      asked: 0,
-      correct: 0,
-      usedQuestionIds: [],
-    };
 
-    const firstQuestion = pickQuestion(currentStage, progress.usedQuestionIds);
+    const firstQuestion = pickQuestion(usedQuestionIds);
     if (!firstQuestion) {
       set({ gameState: "GAME_OVER", gamePhase: "BUILD" });
       return;
     }
 
-    const stageQuestions = getQuestionsByStage(currentStage);
-    const quizCount = Math.min(STAGE_META[currentStage].quizCount, stageQuestions.length);
+    const quizPool = getQuizPool();
+    const quizCount = Math.min(STAGE_META[currentStage].quizCount, quizPool.length);
 
     set({
       gameState: "QUIZ",
@@ -585,9 +588,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (!currentQuestion) return { correct: false };
 
-    const stageQuestions = getQuestionsByStage(currentStage);
     const stageMeta = STAGE_META[currentStage];
-    const quizCount = Math.min(stageMeta.quizCount, stageQuestions.length);
+    const quizPool = getQuizPool();
+    const quizCount = Math.min(stageMeta.quizCount, quizPool.length);
     const progress = stageQuizProgress[currentStage] ?? {
       asked: 0,
       correct: 0,
@@ -658,7 +661,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return { correct: isCorrect, explanation };
     }
 
-    const nextQuestion = pickQuestion(currentStage, usedForStage);
+    const nextQuestion = pickQuestion(updatedGlobalUsed);
     if (!nextQuestion) {
       set({
         ...baseStateUpdate,
