@@ -1,24 +1,24 @@
 import React, { useMemo } from "react";
-import { Billboard, Plane, Sky, Text, useTexture } from "@react-three/drei";
+import { Plane, Sky, Text, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { getImagePath } from "../../data/gameData";
 
 const posterData = [
   {
     label: "1954-1960",
-    title: "Giu luc luong, xay nen",
+    title: "Giữ lực lượng, xây nền",
     file: "Miền Bắc xây dựng chủ nghĩa xã hội.webp",
     position: [-10, 3.4, -8] as [number, number, number],
   },
   {
     label: "1961-1963",
-    title: "Pha Chien tranh dac biet",
+    title: "Phá Chiến tranh đặc biệt",
     file: "Phong trào Đồng khởi miền Nam 1960.jpg",
     position: [0, 3.4, -9] as [number, number, number],
   },
   {
     label: "1964-1965",
-    title: "Chong leo thang chien tranh",
+    title: "Chống leo thang chiến tranh",
     file: "Chiến tranh leo thang.jpg",
     position: [10, 3.4, -8] as [number, number, number],
   },
@@ -97,20 +97,6 @@ const SocialEnvironment = () => {
         />
       ))}
 
-      <Billboard position={[0, 6.4, 0]}>
-        <Text
-          fontSize={0.65}
-          color="#f8fafc"
-          anchorX="center"
-          outlineWidth={0.03}
-          outlineColor="#0f172a"
-        >
-          REVOLUTION NETWORK
-        </Text>
-        <Text position={[0, -0.85, 0]} fontSize={0.28} color="#bae6fd" anchorX="center">
-          Lan tỏa mạng lưới cách mạng 1954-1965
-        </Text>
-      </Billboard>
     </group>
   );
 };

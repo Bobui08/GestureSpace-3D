@@ -1,6 +1,8 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, CylinderGeometry, MeshStandardMaterial } from 'three';
+import { Vector3 } from 'three';
+import type { Group, Mesh } from 'three';
+import type { HandsResultsRef, Landmark } from '../../hooks/useHandTracking';
 
 const CONNECTIONS = [
     [0, 1], [1, 2], [2, 3], [3, 4], // Thumb
@@ -11,65 +13,74 @@ const CONNECTIONS = [
     [5, 9], [9, 13], [13, 17] // Palm
 ];
 
-const HandModel = ({ landmarks, isRight }) => {
-    const jointsRef = useRef([]);
-    const bonesRef = useRef([]);
+type HandModelProps = {
+    handsResultsRef: HandsResultsRef;
+    hand: 'left' | 'right';
+    isRight: boolean;
+};
 
-    // Helper: Project 2D normalized landmarks to 3D Plane (similar to Scene.js logic)
-    const project3D = (landmark, viewport) => {
-        // 0,0 is center of screen in Three.js
-        // Hand tracking: x: 0-1, y: 0-1
-        if (!landmark) return new Vector3(0, 0, 0);
+const project3D = (target: Vector3, landmark: Landmark | undefined, viewport: { width: number; height: number }) => {
+    if (!landmark) {
+        target.set(0, 0, 0);
+        return target;
+    }
 
-        // Scale factor to make it visible in expected scene scale
-        // Screen width approx 16-20 units at z=0 with current camera
-        // Let's use viewport width/height
-        const x = (1 - landmark.x) * viewport.width - viewport.width / 2;
-        const y = (1 - landmark.y) * viewport.height - viewport.height / 2;
-        // Z is tricky. MediaPipe gives 'z' roughly relative to wrist, but scaled.
-        // We can use a fixed Z plane, or try to use the raw Z if available.
-        // For "Hand Visualization", depth matters. 
-        // landmarks[i].z is relative to the image plane, with the same scale as x.
-        const z = -landmark.z * (viewport.width); // Scale z roughly to match x scale?
+    target.set(
+        (1 - landmark.x) * viewport.width - viewport.width / 2,
+        (1 - landmark.y) * viewport.height - viewport.height / 2,
+        -((landmark.z ?? 0) * viewport.width)
+    );
 
-        return new Vector3(x, y, z || 0);
-    };
+    return target;
+};
+
+const HandModel = ({ handsResultsRef, hand, isRight }: HandModelProps) => {
+    const groupRef = useRef<Group>(null);
+    const jointsRef = useRef<(Mesh | null)[]>([]);
+    const bonesRef = useRef<(Mesh | null)[]>([]);
+    const projectedPointRef = useRef(new Vector3());
+    const midpointRef = useRef(new Vector3());
 
     useFrame(({ viewport }) => {
-        if (!landmarks) return;
+        const landmarks = hand === 'right' ? handsResultsRef.current.rightHand : handsResultsRef.current.leftHand;
+
+        if (!groupRef.current) return;
+        if (!landmarks) {
+            groupRef.current.visible = false;
+            return;
+        }
+        groupRef.current.visible = true;
 
         // Update Joints
         landmarks.forEach((lm, i) => {
             if (jointsRef.current[i]) {
-                const pos = project3D(lm, viewport);
-                jointsRef.current[i].position.copy(pos);
+                jointsRef.current[i]!.position.copy(project3D(projectedPointRef.current, lm, viewport));
             }
         });
 
         // Update Bones
         CONNECTIONS.forEach((pair, i) => {
             if (bonesRef.current[i] && jointsRef.current[pair[0]] && jointsRef.current[pair[1]]) {
-                const start = jointsRef.current[pair[0]].position;
-                const end = jointsRef.current[pair[1]].position;
+                const bone = bonesRef.current[i]!;
+                const start = jointsRef.current[pair[0]]!.position;
+                const end = jointsRef.current[pair[1]]!.position;
 
                 // Position is midpoint
-                bonesRef.current[i].position.copy(start).lerp(end, 0.5);
+                bone.position.copy(midpointRef.current.copy(start).lerp(end, 0.5));
 
                 // Orientation
-                bonesRef.current[i].lookAt(end);
-                bonesRef.current[i].rotateX(Math.PI / 2); // Align cylinder Y with direction
+                bone.lookAt(end);
+                bone.rotateX(Math.PI / 2); // Align cylinder Y with direction
 
                 // Length
                 const dist = start.distanceTo(end);
-                bonesRef.current[i].scale.set(1, dist, 1);
+                bone.scale.set(1, dist, 1);
             }
         });
     });
 
-    if (!landmarks) return null;
-
     return (
-        <group>
+        <group ref={groupRef} visible={false}>
             {/* Joints */}
             {Array.from({ length: 21 }).map((_, i) => (
                 <mesh

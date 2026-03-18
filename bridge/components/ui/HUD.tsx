@@ -57,13 +57,13 @@ const HUD = ({ gestureLeft, gestureRight }) => {
     return (
       <div style={styles.fullscreenOverlay}>
         <div style={styles.gameOverCard}>
-          <h1 style={styles.gameOverTitle}>Nhiem vu that bai</h1>
+          <h1 style={styles.gameOverTitle}>Nhiệm vụ thất bại</h1>
           <p style={styles.gameOverText}>
-            Mang luoi bi lo hoac mat on dinh. Hay thu lai voi chien luoc an toan hon.
+            Mạng lưới bị thủng hoặc mất ổn định. Hãy thử lại với chiến lược an toàn hơn.
           </p>
-          <p style={styles.gameOverScore}>Diem: {score}</p>
+          <p style={styles.gameOverScore}>Điểm: {score}</p>
           <button style={styles.retryButton} onClick={startGame}>
-            Choi lai
+            Chơi lại
           </button>
         </div>
       </div>
@@ -99,10 +99,10 @@ const HUD = ({ gestureLeft, gestureRight }) => {
       </div>
 
       <div style={styles.metricGrid}>
-        <Metric label="Influence" value={influence} color="#24c97a" />
-        <Metric label="Stability" value={stability} color="#2e86ff" />
-        <Metric label="Logistics" value={logistics} color="#eab308" />
-        <Metric label="Exposure" value={exposure} color="#ef4444" inverse />
+        <Metric label="Ảnh hưởng" value={influence} color="#24c97a" />
+        <Metric label="Ổn định" value={stability} color="#2e86ff" />
+        <Metric label="Hậu cần" value={logistics} color="#eab308" />
+        <Metric label="Lộ diện" value={exposure} color="#ef4444" inverse />
       </div>
 
       {gamePhase === "DEFEND" && (

@@ -14,7 +14,7 @@ import DefensePhase from './3d/DefensePhase';
 import SocialEnvironment from './3d/SocialEnvironment';
 
 const Game = () => {
-    const { videoRef, leftHand, rightHand, gestureLeft, gestureRight } = useHandTracking();
+    const { videoRef, handsResultsRef, gestureLeft, gestureRight } = useHandTracking();
     const { gameState, gamePhase, updateStageTime } = useGameStore();
 
     // Update timer every second when playing
@@ -62,10 +62,7 @@ const Game = () => {
                 <Suspense fallback={null}>
                     {gameState === 'PRE_INTRO' ? (
                         <PreIntroEffect
-                            leftHand={leftHand}
-                            rightHand={rightHand}
-                            gestureLeft={gestureLeft}
-                            gestureRight={gestureRight}
+                            handsResultsRef={handsResultsRef}
                         />
                     ) : gameState === 'WON' ? (
                         <CelebrationEffect />
@@ -91,16 +88,13 @@ const Game = () => {
                             {/* Render Game Scene (Building) */}
                             {gamePhase === 'BUILD' && (
                                 <Scene
-                                    leftHand={leftHand}
-                                    rightHand={rightHand}
-                                    gestureLeft={gestureLeft}
-                                    gestureRight={gestureRight}
+                                    handsResultsRef={handsResultsRef}
                                 />
                             )}
 
                             {/* Render Defense Phase */}
                             {gamePhase === 'DEFEND' && (
-                                <DefensePhase leftHand={leftHand} rightHand={rightHand} />
+                                <DefensePhase handsResultsRef={handsResultsRef} />
                             )}
                         </>
                     )}

@@ -12,6 +12,22 @@ interface Question {
   explanation: string;
 }
 
+interface FlatQuestionEntry {
+  question: string;
+  options: string[];
+  answers?: string | string[] | number;
+  explanation?: string;
+}
+
+interface LegacyQuestionStage {
+  stageId: string;
+  questions: Question[];
+}
+
+interface LegacyQuestionBank {
+  stages: LegacyQuestionStage[];
+}
+
 interface StageQuizProgress {
   asked: number;
   correct: number;
@@ -82,9 +98,190 @@ const createInitialQuizProgress = (): Record<string, StageQuizProgress> => ({
   [STAGES.STAGE_3_1964_1965]: { asked: 0, correct: 0, usedQuestionIds: [] },
 });
 
+const createEmptyQuestionBank = (): Record<string, Question[]> => ({
+  [STAGES.STAGE_1_1954_1960]: [],
+  [STAGES.STAGE_2_1961_1963]: [],
+  [STAGES.STAGE_3_1964_1965]: [],
+});
+
+const normalizeOption = (option: string) => option.replace(/^[A-D][\.\)]\s*/i, "").trim();
+
+const getStageByIndex = (index: number, total: number) => {
+  if (total <= 0) return STAGES.STAGE_1_1954_1960;
+
+  const bucket = Math.min(
+    STAGE_SEQUENCE.length - 1,
+    Math.floor((index * STAGE_SEQUENCE.length) / total)
+  );
+  return STAGE_SEQUENCE[bucket];
+};
+
+const STAGE_KEYWORDS: Record<string, RegExp[]> = {
+  [STAGES.STAGE_1_1954_1960]: [
+    /\b1954\b/i,
+    /\b1955\b/i,
+    /\b1956\b/i,
+    /\b1957\b/i,
+    /\b1958\b/i,
+    /\b1959\b/i,
+    /\b1960\b/i,
+    /giơnevơ|genev/i,
+    /đồng khởi/i,
+    /đại hội iii/i,
+    /nghị quyết 15/i,
+    /hai ngọn cờ/i,
+    /thống nhất nước nhà/i,
+    /đường trường sơn|đường hồ chí minh trên bộ/i,
+  ],
+  [STAGES.STAGE_2_1961_1963]: [
+    /\b1961\b/i,
+    /\b1962\b/i,
+    /\b1963\b/i,
+    /chiến tranh đặc biệt/i,
+    /ấp chiến lược/i,
+    /ấp bắc/i,
+    /trực thăng vận/i,
+    /thiết xa vận/i,
+    /đường hồ chí minh trên biển|đoàn 759/i,
+    /trung ương 9/i,
+    /đảo chính/i,
+    /đảng nhân dân cách mạng miền nam/i,
+    /đô thị miền nam/i,
+  ],
+  [STAGES.STAGE_3_1964_1965]: [
+    /\b1964\b/i,
+    /\b1965\b/i,
+    /vịnh bắc bộ/i,
+    /chiến tranh phá hoại/i,
+    /leo thang/i,
+    /bình giã/i,
+    /ba gia/i,
+    /đồng xoài/i,
+    /an lão/i,
+    /đèo nhông/i,
+    /dương liễu/i,
+    /quân viễn chinh/i,
+    /trung ương 11|trung ương 12/i,
+  ],
+};
+
+const inferStageId = (entry: FlatQuestionEntry, index: number, total: number) => {
+  const haystack = `${entry.question} ${entry.explanation ?? ""}`.toLowerCase();
+
+  const scores = STAGE_SEQUENCE.reduce<Record<string, number>>((acc, stageId) => {
+    const matched = STAGE_KEYWORDS[stageId].reduce(
+      (score, pattern) => score + (pattern.test(haystack) ? 1 : 0),
+      0
+    );
+    acc[stageId] = matched;
+    return acc;
+  }, {});
+
+  let bestStage = getStageByIndex(index, total);
+  let bestScore = -1;
+
+  STAGE_SEQUENCE.forEach((stageId) => {
+    if (scores[stageId] > bestScore) {
+      bestStage = stageId;
+      bestScore = scores[stageId];
+    }
+  });
+
+  return bestScore > 0 ? bestStage : getStageByIndex(index, total);
+};
+
+const getCorrectIndex = (
+  answer: FlatQuestionEntry["answers"],
+  options: string[]
+) => {
+  if (typeof answer === "number") {
+    return Math.min(Math.max(answer, 0), Math.max(options.length - 1, 0));
+  }
+
+  const rawAnswer = Array.isArray(answer) ? answer[0] : answer;
+  if (typeof rawAnswer !== "string") return 0;
+
+  const trimmedAnswer = rawAnswer.trim();
+  const label = trimmedAnswer.charAt(0).toUpperCase();
+  const labelIndex = label.charCodeAt(0) - 65;
+  if (labelIndex >= 0 && labelIndex < options.length) return labelIndex;
+
+  const normalizedAnswer = normalizeOption(trimmedAnswer).toLowerCase();
+  const optionIndex = options.findIndex(
+    (option) => normalizeOption(option).toLowerCase() === normalizedAnswer
+  );
+
+  return optionIndex >= 0 ? optionIndex : 0;
+};
+
+const normalizeFlatQuestionBank = (entries: FlatQuestionEntry[]) => {
+  const bank = createEmptyQuestionBank();
+
+  entries.forEach((entry, index) => {
+    if (!entry?.question || !Array.isArray(entry.options) || entry.options.length === 0) return;
+
+    const stageId = inferStageId(entry, index, entries.length);
+    const normalizedOptions = entry.options.map((option) => normalizeOption(String(option)));
+
+    bank[stageId].push({
+      id: `quiz-${index + 1}`,
+      question: entry.question.trim(),
+      options: normalizedOptions,
+      correctIndex: getCorrectIndex(entry.answers, normalizedOptions),
+      explanation: entry.explanation?.trim() ?? "",
+    });
+  });
+
+  return bank;
+};
+
+const ensureMinimumStageQuestions = (bank: Record<string, Question[]>) => {
+  const nextBank = STAGE_SEQUENCE.reduce<Record<string, Question[]>>((acc, stageId) => {
+    acc[stageId] = [...(bank[stageId] ?? [])];
+    return acc;
+  }, createEmptyQuestionBank());
+
+  STAGE_SEQUENCE.forEach((targetStageId) => {
+    const requiredCount = STAGE_META[targetStageId].quizCount;
+
+    while (nextBank[targetStageId].length < requiredCount) {
+      const donorStageId = [...STAGE_SEQUENCE]
+        .reverse()
+        .find((stageId) => {
+          if (stageId === targetStageId) return false;
+          return nextBank[stageId].length > STAGE_META[stageId].quizCount;
+        });
+
+      if (!donorStageId) break;
+
+      const movedQuestion = nextBank[donorStageId].pop();
+      if (!movedQuestion) break;
+
+      nextBank[targetStageId].push(movedQuestion);
+    }
+  });
+
+  return nextBank;
+};
+
+const normalizeLegacyQuestionBank = (bank: LegacyQuestionBank) =>
+  STAGE_SEQUENCE.reduce<Record<string, Question[]>>((acc, stageId) => {
+    const stageEntry = bank.stages.find((stage) => stage.stageId === stageId);
+    acc[stageId] = stageEntry?.questions ?? [];
+    return acc;
+  }, createEmptyQuestionBank());
+
+const hasLegacyStages = (bank: unknown): bank is LegacyQuestionBank =>
+  typeof bank === "object" && bank !== null && Array.isArray((bank as LegacyQuestionBank).stages);
+
+const normalizedQuestionBank: Record<string, Question[]> = Array.isArray(questionBank)
+  ? ensureMinimumStageQuestions(normalizeFlatQuestionBank(questionBank as FlatQuestionEntry[]))
+  : hasLegacyStages(questionBank)
+    ? normalizeLegacyQuestionBank(questionBank)
+    : createEmptyQuestionBank();
+
 const getQuestionsByStage = (stageId: string): Question[] => {
-  const stageEntry = questionBank.stages.find((stage) => stage.stageId === stageId);
-  return (stageEntry?.questions ?? []) as Question[];
+  return normalizedQuestionBank[stageId] ?? [];
 };
 
 const pickQuestion = (stageId: string, usedIds: string[]): Question | null => {

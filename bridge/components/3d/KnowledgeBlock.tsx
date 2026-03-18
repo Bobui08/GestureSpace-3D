@@ -1,9 +1,12 @@
+import type { MutableRefObject } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, RoundedBox, Text } from "@react-three/drei";
 import { Vector3 } from "three";
+import type { Group } from "three";
 import gsap from "gsap";
 import { NODE_ICON_FILES, getImagePath } from "../../data/gameData";
+import type { HandsResultsRef } from "../../hooks/useHandTracking";
 
 type BlockProps = {
   data: {
@@ -13,11 +16,10 @@ type BlockProps = {
     position: [number, number, number];
     originalPosition: [number, number, number];
   };
-  handPos: Vector3;
-  leftHandPos: Vector3;
-  gestureRight: string;
-  gestureLeft: string;
-  grabbedBlockId: string | null;
+  rightHandPosRef: MutableRefObject<Vector3>;
+  leftHandPosRef: MutableRefObject<Vector3>;
+  handsResultsRef: HandsResultsRef;
+  grabbedBlockIdRef: MutableRefObject<string | null>;
   setGrabbedBlockId: (id: string | null) => void;
   onDrop: (id: string, pos: Vector3) => { success: boolean } | undefined;
 };
@@ -42,27 +44,70 @@ const getNodeColor = (nodeType: string, warning: boolean): string => {
 
 const KnowledgeBlock: React.FC<BlockProps> = ({
   data,
-  handPos,
-  leftHandPos,
-  gestureRight,
-  gestureLeft,
-  grabbedBlockId,
+  rightHandPosRef,
+  leftHandPosRef,
+  handsResultsRef,
+  grabbedBlockIdRef,
   setGrabbedBlockId,
   onDrop,
 }) => {
-  const meshRef = useRef<THREE.Group>(null);
+  const meshRef = useRef<Group>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isGrabbed, setIsGrabbed] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [balanceWarning, setBalanceWarning] = useState(false);
-  const [position] = useState(new Vector3(...data.position));
+  const positionRef = useRef(new Vector3(...data.position));
+  const targetRef = useRef(new Vector3(...data.position));
+  const midPointRef = useRef(new Vector3());
+  const hoveredRef = useRef(false);
+  const grabbedRef = useRef(false);
+  const shakingRef = useRef(false);
+  const balanceWarningRef = useRef(false);
   const isHeavy = data.nodeType === "DIEM_CHI_HUY";
   const iconPath = getImagePath(
     NODE_ICON_FILES[data.nodeType as keyof typeof NODE_ICON_FILES] ?? NODE_ICON_FILES.CO_SO_QUAN_CHUNG
   );
 
+  const syncHovered = (nextValue: boolean) => {
+    if (hoveredRef.current === nextValue) return;
+    hoveredRef.current = nextValue;
+    setIsHovered(nextValue);
+  };
+
+  const syncGrabbed = (nextValue: boolean) => {
+    if (grabbedRef.current === nextValue) return;
+    grabbedRef.current = nextValue;
+    setIsGrabbed(nextValue);
+  };
+
+  const syncShaking = (nextValue: boolean) => {
+    if (shakingRef.current === nextValue) return;
+    shakingRef.current = nextValue;
+    setIsShaking(nextValue);
+  };
+
+  const syncBalanceWarning = (nextValue: boolean) => {
+    if (balanceWarningRef.current === nextValue) return;
+    balanceWarningRef.current = nextValue;
+    setBalanceWarning(nextValue);
+  };
+
   useEffect(() => {
-    if (!meshRef.current || isGrabbed) return;
+    positionRef.current.set(...data.position);
+    targetRef.current.set(...data.position);
+    syncHovered(false);
+    syncGrabbed(false);
+    syncShaking(false);
+    syncBalanceWarning(false);
+    if (meshRef.current) {
+      meshRef.current.position.set(...data.position);
+      meshRef.current.scale.set(1, 1, 1);
+      meshRef.current.rotation.set(0, 0, 0);
+    }
+  }, [data.id, data.position]);
+
+  useEffect(() => {
+    if (!meshRef.current || grabbedRef.current) return;
 
     gsap.to(meshRef.current.scale, {
       x: 1.04,
@@ -91,8 +136,8 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
 
   const triggerShake = () => {
     if (!meshRef.current) return;
-    setIsShaking(true);
-    const tl = gsap.timeline({ onComplete: () => setIsShaking(false) });
+    syncShaking(true);
+    const tl = gsap.timeline({ onComplete: () => syncShaking(false) });
     tl.to(meshRef.current.position, {
       x: "+=0.08",
       duration: 0.05,
@@ -106,56 +151,60 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
   };
 
   useFrame(() => {
-    if (!meshRef.current || isShaking) return;
+    if (!meshRef.current || shakingRef.current) return;
 
-    const rightDist = handPos ? handPos.distanceTo(position) : 999;
-    const leftDist = leftHandPos ? leftHandPos.distanceTo(position) : 999;
+    const position = positionRef.current;
+    const rightHandPos = rightHandPosRef.current;
+    const leftHandPos = leftHandPosRef.current;
+    const { gestureRight, gestureLeft } = handsResultsRef.current;
+    const rightDist = rightHandPos.distanceTo(position);
+    const leftDist = leftHandPos.distanceTo(position);
     const anyHandClose = rightDist < 1.45 || leftDist < 1.45;
     const dualClose = rightDist < 2 && leftDist < 2;
-    setIsHovered(anyHandClose);
+    syncHovered(anyHandClose);
 
-    if (!isGrabbed) {
-      if (grabbedBlockId !== null) return;
+    if (!grabbedRef.current) {
+      if (grabbedBlockIdRef.current !== null) return;
       if (isHeavy) {
         if (dualClose && gestureRight === "PINCH" && gestureLeft === "PINCH") {
-          setIsGrabbed(true);
+          syncGrabbed(true);
           setGrabbedBlockId(data.id);
           gsap.killTweensOf(meshRef.current.scale);
           gsap.killTweensOf(meshRef.current.position);
         }
       } else if (rightDist < 1.45 && gestureRight === "PINCH") {
-        setIsGrabbed(true);
+        syncGrabbed(true);
         setGrabbedBlockId(data.id);
         gsap.killTweensOf(meshRef.current.scale);
         gsap.killTweensOf(meshRef.current.position);
       }
     }
 
-    if (isGrabbed) {
+    if (grabbedRef.current) {
       let stillGrabbing = false;
       if (isHeavy) {
         stillGrabbing = gestureRight === "PINCH" && gestureLeft === "PINCH";
         if (stillGrabbing) {
-          const mid = new Vector3(
-            (handPos.x + leftHandPos.x) / 2,
-            (handPos.y + leftHandPos.y) / 2,
+          const mid = midPointRef.current.set(
+            (rightHandPos.x + leftHandPos.x) / 2,
+            (rightHandPos.y + leftHandPos.y) / 2,
             0
           );
           position.lerp(mid, 0.2);
-          setBalanceWarning(Math.abs(handPos.y - leftHandPos.y) > 2);
+          syncBalanceWarning(Math.abs(rightHandPos.y - leftHandPos.y) > 2);
         }
       } else {
         stillGrabbing = gestureRight === "PINCH";
         if (stillGrabbing) {
-          position.lerp(handPos, 0.2);
+          position.lerp(rightHandPos, 0.2);
         }
       }
 
       if (stillGrabbing) {
         meshRef.current.position.copy(position);
       } else {
-        setIsGrabbed(false);
-        setBalanceWarning(false);
+        syncGrabbed(false);
+        syncBalanceWarning(false);
         const result = onDrop(data.id, position);
 
         if (!result?.success) {
@@ -173,8 +222,8 @@ const KnowledgeBlock: React.FC<BlockProps> = ({
 
         gsap.to(meshRef.current.scale, { x: 1, y: 1, z: 1, duration: 0.2 });
       }
-    } else if (!isShaking) {
-      const target = new Vector3(...data.position);
+    } else if (!shakingRef.current) {
+      const target = targetRef.current.set(...data.position);
       position.lerp(target, 0.05);
       meshRef.current.position.x = position.x;
       meshRef.current.position.z = position.z;

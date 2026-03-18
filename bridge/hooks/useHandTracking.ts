@@ -1,20 +1,30 @@
+import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 // MediaPipe Types
-interface Landmark {
+export interface Landmark {
     x: number;
     y: number;
     z?: number;
 }
 
-type GestureType = 'NONE' | 'PINCH' | 'OPEN' | 'POINT' | 'UNKNOWN';
+export type GestureType = 'NONE' | 'PINCH' | 'OPEN' | 'POINT' | 'UNKNOWN';
 
-interface HandsResults {
+export interface HandsResults {
     leftHand: Landmark[] | null;
     rightHand: Landmark[] | null;
     gestureLeft: GestureType;
     gestureRight: GestureType;
 }
+
+export type HandsResultsRef = MutableRefObject<HandsResults>;
+
+const EMPTY_HANDS_RESULTS: HandsResults = {
+    leftHand: null,
+    rightHand: null,
+    gestureLeft: 'NONE',
+    gestureRight: 'NONE',
+};
 
 declare global {
     interface Window {
@@ -25,12 +35,9 @@ declare global {
 export const useHandTracking = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const requestRef = useRef<number | undefined>(undefined);
-    const [handsResults, setHandsResults] = useState<HandsResults>({
-        leftHand: null,
-        rightHand: null,
-        gestureLeft: 'NONE',
-        gestureRight: 'NONE',
-    });
+    const handsResultsRef = useRef<HandsResults>({ ...EMPTY_HANDS_RESULTS });
+    const uiResultsRef = useRef<HandsResults>({ ...EMPTY_HANDS_RESULTS });
+    const [handsResults, setHandsResults] = useState<HandsResults>({ ...EMPTY_HANDS_RESULTS });
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
 
     // Detect gesture helper
@@ -61,9 +68,27 @@ export const useHandTracking = () => {
     };
 
     useEffect(() => {
+        if (window.Hands) {
+            setScriptsLoaded(true);
+            return;
+        }
+
+        const existingScript = document.querySelector<HTMLScriptElement>('script[data-mediapipe-hands="true"]');
+        if (existingScript) {
+            const handleReady = () => setScriptsLoaded(true);
+
+            existingScript.addEventListener('load', handleReady);
+            if (window.Hands) {
+                setScriptsLoaded(true);
+            }
+
+            return () => existingScript.removeEventListener('load', handleReady);
+        }
+
         // Dynamically load MediaPipe Hands script
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+        script.dataset.mediapipeHands = 'true';
         script.crossOrigin = 'anonymous';
         script.async = true;
 
@@ -121,12 +146,27 @@ export const useHandTracking = () => {
                 }
             }
 
-            setHandsResults({
+            const nextResults = {
                 leftHand: left,
                 rightHand: right,
                 gestureLeft: left ? detectGesture(left) : 'NONE',
                 gestureRight: right ? detectGesture(right) : 'NONE',
-            });
+            };
+
+            handsResultsRef.current = nextResults;
+
+            const previousUiResults = uiResultsRef.current;
+            const presenceChanged =
+                Boolean(previousUiResults.leftHand) !== Boolean(nextResults.leftHand) ||
+                Boolean(previousUiResults.rightHand) !== Boolean(nextResults.rightHand);
+            const gestureChanged =
+                previousUiResults.gestureLeft !== nextResults.gestureLeft ||
+                previousUiResults.gestureRight !== nextResults.gestureRight;
+
+            if (presenceChanged || gestureChanged) {
+                uiResultsRef.current = nextResults;
+                setHandsResults(nextResults);
+            }
         });
 
         const animate = async () => {
@@ -145,7 +185,12 @@ export const useHandTracking = () => {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        video: { width: 640, height: 480 }
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            frameRate: { ideal: 30, max: 30 },
+                            facingMode: 'user',
+                        }
                     });
                     
                     if (videoRef.current) {
@@ -177,5 +222,5 @@ export const useHandTracking = () => {
         };
     }, [scriptsLoaded]);
 
-    return { videoRef, ...handsResults };
+    return { videoRef, handsResultsRef, ...handsResults };
 };
